@@ -1,0 +1,2981 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Norsk skatteinngang 2024 — fra topp til bunn</title>
+<meta name="description" content="Pedagogisk dashboard som viser norsk skatteinngang fra offentlig forvaltnings totale inntekter på 3 218 mrd. ned til småbedriftenes bidrag på 7 mrd. Med forklaringer, scenarier og 5-årig tidsserie.">
+<meta name="author" content="Analyse basert på SSB-data, Skatteetaten og NRK">
+<style>
+:root {
+  --bg: #FAFAF7;
+  --surface: #FFFFFF;
+  --surface-2: #F1EFE8;
+  --text: #2C2C2A;
+  --text-2: #5F5E5A;
+  --text-3: #888780;
+  --border: rgba(44, 44, 42, 0.12);
+  --border-strong: rgba(44, 44, 42, 0.25);
+  --info-bg: #E6F1FB;
+  --info-text: #0C447C;
+  --info-border: #378ADD;
+  --warn-bg: #FAEEDA;
+  --warn-text: #633806;
+  --success-bg: #E1F5EE;
+  --success-text: #04342C;
+  --accent-petroleum: #F5C4B3;
+  --accent-fastland: #AFA9EC;
+  --accent-grunnrente: #5DCAA5;
+  --accent-smb: #7F77DD;
+  --neutral: #D3D1C7;
+  --line: #534AB7;
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1A1A18;
+    --surface: #252522;
+    --surface-2: #2C2C2A;
+    --text: #F1EFE8;
+    --text-2: #B4B2A9;
+    --text-3: #888780;
+    --border: rgba(241, 239, 232, 0.12);
+    --border-strong: rgba(241, 239, 232, 0.25);
+    --info-bg: #042C53;
+    --info-text: #B5D4F4;
+    --warn-bg: #412402;
+    --warn-text: #FAC775;
+    --success-bg: #04342C;
+    --success-text: #9FE1CB;
+    --line: #AFA9EC;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.container {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+}
+
+header {
+  margin-bottom: 1.5rem;
+}
+
+.eyebrow {
+  font-size: 12px;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 8px;
+  font-weight: 500;
+}
+
+h1 {
+  font-size: 32px;
+  font-weight: 500;
+  margin: 0 0 12px;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.lede {
+  font-size: 17px;
+  color: var(--text-2);
+  margin: 0;
+  max-width: 70ch;
+}
+
+.toc {
+  background: var(--surface-2);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.5rem;
+  margin: 1.5rem 0;
+  font-size: 13px;
+}
+.toc-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--text-3);
+  letter-spacing: 0.05em;
+  margin: 0 0 8px;
+  font-weight: 500;
+}
+.toc ol { margin: 0; padding-left: 1.25rem; color: var(--text-2); }
+.toc li { padding: 2px 0; }
+.toc a { color: var(--text); text-decoration: none; }
+.toc a:hover { text-decoration: underline; }
+
+section {
+  margin: 3rem 0 0;
+  scroll-margin-top: 1rem;
+}
+
+h2 {
+  font-size: 22px;
+  font-weight: 500;
+  margin: 0 0 4px;
+  line-height: 1.3;
+}
+
+.section-meta {
+  font-size: 13px;
+  color: var(--text-3);
+  margin: 0 0 1.25rem;
+}
+
+h3 {
+  font-size: 15px;
+  font-weight: 500;
+  margin: 1.75rem 0 0.5rem;
+}
+
+p { margin: 0 0 1rem; }
+
+/* ===== SAMMENDRAGSSIDE ===== */
+.summary {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  margin: 1.5rem 0 0;
+}
+.summary h2 {
+  font-size: 18px;
+  margin: 0 0 1rem;
+}
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+  margin: 1rem 0;
+}
+.summary-card {
+  border-left: 3px solid var(--info-border);
+  padding: 4px 0 4px 12px;
+}
+.summary-card .num {
+  font-size: 24px;
+  font-weight: 500;
+  margin: 0 0 2px;
+  font-variant-numeric: tabular-nums;
+}
+.summary-card .lbl {
+  font-size: 12px;
+  color: var(--text-2);
+  margin: 0;
+  line-height: 1.4;
+}
+.summary-takeaways {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 0.5px solid var(--border);
+}
+.summary-takeaways ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 14px;
+  color: var(--text-2);
+}
+.summary-takeaways li {
+  padding: 4px 0;
+  line-height: 1.5;
+}
+.summary-takeaways li strong {
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* ===== NESTED RECTANGLES — proporsjonal hierarkivisning ===== */
+.nested-wrap {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin: 1rem 0;
+}
+.nested-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  max-width: 720px;
+  margin: 0 auto;
+}
+.nested-caption {
+  font-size: 12px;
+  color: var(--text-3);
+  text-align: center;
+  margin: 0.75rem 0 0;
+  font-style: italic;
+}
+
+.level-table {
+  margin: 1rem 0 0;
+  border-top: 0.5px solid var(--border);
+  padding-top: 1rem;
+}
+.level-row {
+  display: grid;
+  grid-template-columns: 16px 1fr auto auto;
+  gap: 12px;
+  align-items: baseline;
+  padding: 8px 0;
+  border-bottom: 0.5px solid var(--border);
+  font-size: 13px;
+}
+.level-row:last-child {
+  border-bottom: none;
+}
+.level-row .swatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  margin-top: 2px;
+}
+.level-row .name {
+  color: var(--text);
+  font-weight: 500;
+}
+.level-row .name .desc {
+  display: block;
+  color: var(--text-2);
+  font-weight: 400;
+  font-size: 12px;
+  margin-top: 2px;
+  line-height: 1.4;
+}
+.level-row .value {
+  color: var(--text);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.level-row .share {
+  color: var(--text-2);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  min-width: 100px;
+  text-align: right;
+}
+
+/* ===== 2024 vs 2025 SAMMENLIGNING ===== */
+.year-compare {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+  margin: 1rem 0;
+}
+.year-compare-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto auto;
+  gap: 12px;
+  align-items: baseline;
+  padding: 10px 12px;
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  font-size: 13px;
+}
+.year-compare-row.header {
+  background: var(--surface-2);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-3);
+  font-weight: 500;
+}
+.year-compare .label {
+  font-weight: 500;
+  color: var(--text);
+}
+.year-compare .label small {
+  display: block;
+  font-weight: 400;
+  font-size: 11px;
+  color: var(--text-3);
+  margin-top: 2px;
+}
+.year-compare .y2024,
+.year-compare .y2025 {
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  text-align: right;
+  min-width: 70px;
+}
+.year-compare .change {
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  text-align: right;
+  min-width: 60px;
+}
+.year-compare .change.up { color: #0F6E56; }
+.year-compare .change.down { color: #B33A1F; }
+.year-compare .change.flat { color: var(--text-3); }
+.year-compare .arrow {
+  font-size: 14px;
+  color: var(--text-3);
+  text-align: center;
+  width: 16px;
+}
+
+/* Data quality badges */
+.badge {
+  display: inline-block;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 500;
+  vertical-align: middle;
+  margin-left: 6px;
+}
+.badge.regnskap {
+  background: rgba(15, 110, 86, 0.15);
+  color: #0F6E56;
+  border: 0.5px solid rgba(15, 110, 86, 0.3);
+}
+.badge.foreløpig {
+  background: rgba(216, 90, 48, 0.15);
+  color: #B33A1F;
+  border: 0.5px solid rgba(216, 90, 48, 0.3);
+}
+.badge.budsjett {
+  background: rgba(83, 74, 183, 0.12);
+  color: #534AB7;
+  border: 0.5px solid rgba(83, 74, 183, 0.3);
+}
+
+/* ===== DISTRIBUTION BARS ===== */
+.dist-bar {
+  margin: 12px 0;
+  font-size: 12px;
+}
+.dist-bar-row {
+  display: grid;
+  grid-template-columns: 200px 1fr 80px;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.dist-bar-label {
+  color: var(--text);
+  font-size: 12px;
+}
+.dist-bar-track {
+  background: var(--surface-2);
+  border-radius: 2px;
+  overflow: hidden;
+  height: 18px;
+  position: relative;
+}
+.dist-bar-fill {
+  background: var(--line);
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+.dist-bar-fill.warning { background: #D85A30; }
+.dist-bar-fill.success { background: #0F6E56; }
+.dist-bar-fill.purple { background: #534AB7; }
+.dist-bar-value {
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  text-align: right;
+  color: var(--text-2);
+}
+
+/* ===== CHART CARD ===== */
+.chart-card {
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  background: var(--surface);
+  margin: 1.5rem 0;
+}
+.chart-card svg {
+  width: 100%;
+  height: auto;
+  max-height: 420px;
+}
+
+/* ===== PERSPEKTIV KORT ===== */
+.perspective-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 1.5rem 0;
+}
+.perspective-card {
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  background: var(--surface);
+}
+.perspective-card.civita {
+  border-left: 3px solid #534AB7;
+}
+.perspective-card.lo {
+  border-left: 3px solid #D85A30;
+}
+.perspective-card h4 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-3);
+}
+.perspective-card .source-tag {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-3);
+  margin-bottom: 8px;
+}
+.perspective-card p {
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0.5rem 0;
+}
+@media (max-width: 700px) {
+  .perspective-grid { grid-template-columns: 1fr; }
+  .dist-bar-row { grid-template-columns: 140px 1fr 70px; }
+}
+
+/* ===== KJENTE REFERANSER ===== */
+.references {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.5rem;
+  margin: 1rem 0;
+}
+.references-title {
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0 0 0.25rem;
+  color: var(--text);
+}
+.references-sub {
+  font-size: 12px;
+  color: var(--text-3);
+  margin: 0 0 1rem;
+}
+.ref-row {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 14px;
+  align-items: baseline;
+  padding: 8px 0;
+  border-top: 0.5px solid var(--border);
+  font-size: 13px;
+}
+.ref-row:first-of-type {
+  border-top: none;
+}
+.ref-amount {
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+.ref-desc {
+  color: var(--text-2);
+  line-height: 1.5;
+}
+.ref-desc strong {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.explain {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.25rem;
+  margin: 0.75rem 0 1.25rem;
+}
+.explain p { margin: 0 0 0.75rem; font-size: 14px; line-height: 1.65; }
+.explain p:last-child { margin: 0; }
+.explain strong { font-weight: 500; }
+
+.callout {
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.25rem;
+  margin: 1.25rem 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.callout-info {
+  background: var(--info-bg);
+  color: var(--info-text);
+}
+.callout-warn {
+  background: var(--warn-bg);
+  color: var(--warn-text);
+}
+.callout-success {
+  background: var(--success-bg);
+  color: var(--success-text);
+}
+.callout p { margin: 0 0 0.5rem; }
+.callout p:last-child { margin: 0; }
+.callout strong { font-weight: 500; }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin: 1rem 0;
+}
+.stat-card {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+}
+.stat-label {
+  font-size: 11px;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0 0 4px;
+  font-weight: 500;
+}
+.stat-value {
+  font-size: 22px;
+  font-weight: 500;
+  margin: 0;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+.stat-sub {
+  font-size: 12px;
+  color: var(--text-2);
+  margin: 4px 0 0;
+  line-height: 1.4;
+}
+
+table.data {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0 1.5rem;
+  font-size: 13px;
+}
+table.data th, table.data td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 0.5px solid var(--border);
+}
+table.data th {
+  font-weight: 500;
+  color: var(--text-3);
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+table.data td.num, table.data th.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+table.data tr:hover td {
+  background: var(--surface-2);
+}
+table.data .total td {
+  font-weight: 500;
+  border-top: 0.5px solid var(--border-strong);
+  background: var(--surface-2);
+}
+
+.compare-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 1rem 0;
+}
+@media (max-width: 600px) {
+  .compare-row { grid-template-columns: 1fr; }
+}
+.compare-card {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+.compare-card.highlight {
+  border: 2px solid var(--info-border);
+}
+.compare-h {
+  font-size: 12px;
+  color: var(--text-2);
+  margin: 0 0 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.compare-row-line {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+  font-size: 13px;
+  border-bottom: 0.5px solid var(--border);
+}
+.compare-row-line:last-child { border-bottom: none; }
+.compare-row-line span:first-child { color: var(--text-2); }
+.compare-row-line span:last-child { font-weight: 500; font-variant-numeric: tabular-nums; }
+
+.arrow-down {
+  display: flex;
+  justify-content: center;
+  margin: 6px 0;
+  color: var(--text-3);
+  font-size: 16px;
+}
+
+/* ===== SPARKLINE / TIME SERIES ===== */
+.timeseries-card {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin: 0 0 12px;
+}
+.ts-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0 0 4px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.ts-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  margin: 0;
+}
+.ts-current {
+  font-size: 18px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.ts-change {
+  font-size: 12px;
+  color: var(--text-2);
+  margin: 0 0 8px;
+}
+.ts-svg {
+  width: 100%;
+  height: 60px;
+  display: block;
+}
+.ts-axis {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--text-3);
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+footer {
+  margin-top: 4rem;
+  padding-top: 1.5rem;
+  border-top: 0.5px solid var(--border);
+  font-size: 12px;
+  color: var(--text-3);
+  line-height: 1.7;
+}
+footer h4 {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-2);
+  margin: 0 0 8px;
+  font-weight: 500;
+}
+footer p { margin: 0 0 0.5rem; }
+
+.print-tip {
+  font-size: 11px;
+  color: var(--text-3);
+  margin-top: 1rem;
+  font-style: italic;
+}
+
+@media print {
+  body { background: white; color: black; }
+  .container { padding: 1rem; max-width: 100%; }
+  section { page-break-inside: avoid; }
+  header, footer { page-break-after: avoid; }
+  .summary { break-after: page; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<header>
+  <p class="eyebrow">Skatteinngang Norge — inntektsåret 2024</p>
+  <h1>Fra 3 218 milliarder til 7 milliarder</h1>
+  <p class="lede">Et pedagogisk dashboard som tar deg fra offentlig forvaltnings totale inntekter, gjennom skattesystemet, og helt ned til småbedriftenes faktiske bidrag. Med scenarier for skattesats-endringer og 5-årig historisk perspektiv.</p>
+  <p style="margin-top:10px"><span style="display:inline-block;font-family:monospace;font-size:11px;font-weight:700;background:var(--success-bg);color:var(--success-text);border:1px solid var(--accent-grunnrente);padding:3px 11px;border-radius:20px">✓ Hovedtall verifisert mot SSB 14668, 08231 og 07091 (kontrollert juni 2026)</span></p>
+</header>
+
+<!-- ============ SAMMENDRAGSSIDE ============ -->
+<section class="summary" id="sammendrag">
+  <h2>Sammendrag — det du trenger å vite</h2>
+  <p style="font-size: 14px; color: var(--text-2); margin: 0 0 1rem;">Hvis du bare leser én side: dette er nøkkeltallene fra hele dokumentet, plassert side ved side.</p>
+
+  <p style="font-size: 12px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.05em; margin: 1rem 0 8px; font-weight: 500;">Det store bildet — offentlig forvaltning og selskapsskatt</p>
+  <div class="summary-grid">
+    <div class="summary-card">
+      <p class="num">3 218 mrd.</p>
+      <p class="lbl">Offentlig forvaltnings totale inntekter 2024</p>
+    </div>
+    <div class="summary-card">
+      <p class="num">510 mrd.</p>
+      <p class="lbl">All selskapsskatt (16 % av off. inntekter)</p>
+    </div>
+    <div class="summary-card">
+      <p class="num">382 mrd.</p>
+      <p class="lbl">Petroleumsskatt fra 30 selskap</p>
+    </div>
+    <div class="summary-card">
+      <p class="num">110 mrd.</p>
+      <p class="lbl">Selskapsskatt fastland (alle størrelser)</p>
+    </div>
+    <div class="summary-card">
+      <p class="num">~35 mrd.</p>
+      <p class="lbl">SMB-segmentet (under 100 ansatte)</p>
+    </div>
+    <div class="summary-card">
+      <p class="num">~7 mrd.</p>
+      <p class="lbl">Småbedrifter under 10 ansatte</p>
+    </div>
+    <div class="summary-card">
+      <p class="num">593 777</p>
+      <p class="lbl">Antall småbedrifter under 10 ansatte (90,2 % av alle)</p>
+    </div>
+    <div class="summary-card">
+      <p class="num">~770 000</p>
+      <p class="lbl">Sysselsatte i småbedrifter (43 % av privat sektor)</p>
+    </div>
+  </div>
+
+  <p style="font-size: 12px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.05em; margin: 1.5rem 0 8px; font-weight: 500;">Eierbeskatningen — formuesskatt og utbytteskatt</p>
+  <div class="summary-grid">
+    <div class="summary-card">
+      <p class="num">31,1 mrd.</p>
+      <p class="lbl">Formuesskatt 2024 — 3,6× høyere enn 2005</p>
+    </div>
+    <div class="summary-card">
+      <p class="num">~31 mrd.</p>
+      <p class="lbl">Utbytteskatt 2024 (37,84 % effektiv sats)</p>
+    </div>
+    <div class="summary-card">
+      <p class="num">701 482</p>
+      <p class="lbl">Personer som betaler formuesskatt (15,4 %)</p>
+    </div>
+    <div class="summary-card">
+      <p class="num">28,6 %</p>
+      <p class="lbl">Av formuesskatt fra topp 0,5 % (2 838 personer)</p>
+    </div>
+    <div class="summary-card">
+      <p class="num">5 %</p>
+      <p class="lbl">Andel av Oslo Børs eid av norske husholdninger</p>
+    </div>
+    <div class="summary-card">
+      <p class="num">−11,7 mrd.</p>
+      <p class="lbl">Statisk provenytap ved retur til 2020-nivå</p>
+    </div>
+    <div class="summary-card">
+      <p class="num">8–11 mrd.</p>
+      <p class="lbl">Realistisk anslag (NHH-tolkning, atferdsjustert)</p>
+    </div>
+    <div class="summary-card">
+      <p class="num">230 / 24 800</p>
+      <p class="lbl">«Nullskatteytere» med formue &gt; 50 mill. / totalt</p>
+    </div>
+  </div>
+
+  <div class="summary-takeaways">
+    <p style="font-size: 12px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 8px; font-weight: 500;">Seks nøkkelinnsikter fra hele rapporten</p>
+    <ul>
+      <li><strong>Pyramiden er ekstremt skjev.</strong> 30 petroleumsselskap betaler 55 ganger mer i selskapsskatt enn 593 777 småbedrifter samlet. Per selskap er forskjellen 250 millioner ganger.</li>
+      <li><strong>Selskapsskatten er bare toppen av isfjellet.</strong> Småbedriftene bidrar med ~7 mrd. i selskapsskatt, men ~205 mrd. samlet (personskatt fra ansatte, AGA, MVA, eierskatter). Selskapsskatten er bare 4 % av deres totale bidrag.</li>
+      <li><strong>Politikknappene er asymmetriske.</strong> En endring i selskapsskattesatsen (f.eks. 22→25 %) treffer 58 % petroleum, 22 % store fastland, 13 % mellomstore — bare 3 % rammer småbedriftene.</li>
+      <li><strong>Eierbeskatningen har vokst kraftig.</strong> Formuesskatten er 3,6× høyere enn i 2005, utbytteskatten 5,7× siden 2007. 2021 var rekordåret med 146 mrd. utbytte før skattereformen, mot 64 mrd. året før — et tydelig bevis på skattetilpasning.</li>
+      <li><strong>Formuesskatten treffer skjevt mellom næringer.</strong> Eiendom (535 selskap), jordbruk (326) og kultur (189) topper formuesskatteposisjonen. Petroleum har bare 2 selskap i posisjon — fordi næringen er dominert av utenlandske og statlige eiere som ikke betaler norsk formuesskatt.</li>
+      <li><strong>«Nullskatteyter»-debatten er villedende.</strong> Av 24 800 personer som kun betalte formuesskatt i 2022, var 22 400 (90 %) pensjonister med formue under 10 mill. kr. Bare 230 hadde formue over 50 mill. kr — og selv disse betaler typisk inntektsskatt i 8 av 11 år.</li>
+    </ul>
+  </div>
+</section>
+
+<nav class="toc">
+  <p class="toc-title">Innhold</p>
+  <ol>
+    <li><a href="#hierarki">Hierarkiet — fra 3 218 mrd. til 7 mrd. i én visualisering</a></li>
+    <li><a href="#oppdatering-2025">Oppdatering 2025 — hva har endret seg?</a></li>
+    <li><a href="#eierskatt">Formuesskatt, utbytteskatt og «nullskatteyter»-debatten</a></li>
+    <li><a href="#smaa">Fokus: småbedriftene under 10 ansatte</a></li>
+    <li><a href="#naering">Næringer som dominerer småbedriftssegmentet</a></li>
+    <li><a href="#scenarier">Hva skjer hvis selskapsskatten endres?</a></li>
+    <li><a href="#fullbilde">Fullbilde — det skjulte bidraget</a></li>
+    <li><a href="#historikk">Appendix: tidsserie 2020–2025</a></li>
+  </ol>
+</nav>
+
+
+<!-- ============ HIERARKIVISUALISERING ============ -->
+<section id="hierarki">
+  <h2>Hierarkiet — fra 3 218 mrd. til 7 mrd. i én visualisering</h2>
+  <p class="section-meta">Hver ramme er et "kasse-i-kasse" der det indre er en del av det ytre</p>
+
+  <div class="nested-wrap">
+    <svg class="nested-svg" viewBox="0 0 720 460" role="img" aria-labelledby="nested-title nested-desc">
+      <title id="nested-title">Hierarki av offentlige inntekter, fra 3 218 mrd. til 7 mrd.</title>
+      <desc id="nested-desc">Fire nøstede rektangler: ytterst offentlig forvaltning 3 218 milliarder, deretter skatt på inntekt og formue 1 079 milliarder, deretter selskapsskatt fastland 110 milliarder, og innerst småbedrifter 7 milliarder kroner.</desc>
+
+      <!-- Nivå 0: Offentlig forvaltning, 700x420 (gråblå) -->
+      <rect x="10" y="20" width="700" height="420" rx="8" fill="#E6F1FB" stroke="#378ADD" stroke-width="1"/>
+      <text x="30" y="48" font-family="-apple-system, sans-serif" font-size="13" font-weight="500" fill="#0C447C">Offentlig forvaltning — totale inntekter</text>
+      <text x="30" y="68" font-family="-apple-system, sans-serif" font-size="22" font-weight="500" fill="#0C447C" font-variant-numeric="tabular-nums">3 218 mrd. kr</text>
+      <text x="30" y="86" font-family="-apple-system, sans-serif" font-size="11" fill="#185FA5">Stat + kommuner + folketrygden</text>
+
+      <!-- Nivå 1: Skatt på inntekt og formue, 405x243 (lys lilla) — 33,5% av areal -->
+      <rect x="35" y="172" width="405" height="243" rx="6" fill="#CECBF6" stroke="#534AB7" stroke-width="1"/>
+      <text x="50" y="198" font-family="-apple-system, sans-serif" font-size="12" font-weight="500" fill="#26215C">Skatt på inntekt og formue</text>
+      <text x="50" y="220" font-family="-apple-system, sans-serif" font-size="20" font-weight="500" fill="#26215C" font-variant-numeric="tabular-nums">1 079 mrd.</text>
+      <text x="50" y="236" font-family="-apple-system, sans-serif" font-size="10" fill="#3C3489">33,5 % av offentlige inntekter</text>
+
+      <!-- Nivå 2: Selskapsskatt fastland, 130x80 (sterkere lilla) — 3,4% av areal -->
+      <rect x="55" y="325" width="160" height="80" rx="5" fill="#7F77DD" stroke="#26215C" stroke-width="1"/>
+      <text x="65" y="346" font-family="-apple-system, sans-serif" font-size="11" font-weight="500" fill="#FFFFFF">Selskapsskatt fastland</text>
+      <text x="65" y="368" font-family="-apple-system, sans-serif" font-size="17" font-weight="500" fill="#FFFFFF" font-variant-numeric="tabular-nums">110 mrd.</text>
+      <text x="65" y="382" font-family="-apple-system, sans-serif" font-size="10" fill="#FFFFFF" opacity="0.85">3,4 % av off. inntekter</text>
+
+      <!-- Nivå 3: Småbedrifter, blåst opp til 92x32 for lesbarhet (egentlig 33x20) — 0,22% av areal -->
+      <rect x="225" y="370" width="100" height="32" rx="4" fill="#26215C" stroke="#26215C" stroke-width="1"/>
+      <text x="232" y="384" font-family="-apple-system, sans-serif" font-size="9" font-weight="500" fill="#FFFFFF">Småbedrifter (&lt;10 ans.)</text>
+      <text x="232" y="396" font-family="-apple-system, sans-serif" font-size="11" font-weight="500" fill="#FFFFFF" font-variant-numeric="tabular-nums">7 mrd.</text>
+
+      <!-- Indikatorlinje: faktisk størrelse hadde vært -->
+      <line x1="335" y1="386" x2="395" y2="386" stroke="#888780" stroke-width="0.8" stroke-dasharray="3,2"/>
+      <rect x="395" y="378" width="32" height="16" rx="2" fill="none" stroke="#888780" stroke-width="0.8" stroke-dasharray="2,2"/>
+      <text x="432" y="389" font-family="-apple-system, sans-serif" font-size="9" fill="#888780">faktisk størrelse</text>
+    </svg>
+    <p class="nested-caption">De tre minste rektanglene er proporsjonale i areal. Det innerste (7 mrd. småbedriftsskatt) er i sannhet enda mindre — den stiplede ruten viser den faktiske skalaen.</p>
+  </div>
+
+  <div class="level-table">
+    <div class="level-row">
+      <span class="swatch" style="background: #E6F1FB; border: 1px solid #378ADD;"></span>
+      <span class="name">Offentlig forvaltning, totale inntekter
+        <span class="desc">Stat + kommuner + fylkeskommuner + folketrygden samlet</span>
+      </span>
+      <span class="value">3 218 mrd.</span>
+      <span class="share">100 %</span>
+    </div>
+    <div class="level-row">
+      <span class="swatch" style="background: #CECBF6;"></span>
+      <span class="name">Skatt på inntekt og formue
+        <span class="desc">Av dette: personskatt 558 mrd., petroleumsskatt 382 mrd., selskapsskatt fastland 110 mrd., grunnrente 17 mrd., andre 12 mrd.</span>
+      </span>
+      <span class="value">1 079 mrd.</span>
+      <span class="share">33,5 % av total</span>
+    </div>
+    <div class="level-row">
+      <span class="swatch" style="background: #7F77DD;"></span>
+      <span class="name">Selskapsskatt fastland
+        <span class="desc">22 % skatt på overskudd til alle selskaper utenom petroleum. Av dette: store selskap 75 mrd., mellomstore 28 mrd., småbedrifter 7 mrd.</span>
+      </span>
+      <span class="value">110 mrd.</span>
+      <span class="share">10,2 % av forrige</span>
+    </div>
+    <div class="level-row">
+      <span class="swatch" style="background: #26215C;"></span>
+      <span class="name">Småbedrifter under 10 ansatte
+        <span class="desc">593 777 bedrifter (90,2 % av alle norske bedrifter). Triangulert estimat — ingen offisiell SSB-tabell krysser skatt med selskapsstørrelse.</span>
+      </span>
+      <span class="value">~7 mrd.</span>
+      <span class="share">6,4 % av forrige</span>
+    </div>
+  </div>
+
+  <div class="callout callout-warn" style="margin-top: 1.25rem;">
+    <p><strong>Det innerste rektangelet er bevisst forstørret.</strong> Hvis det hadde fulgt eksakt areal-proporsjon, hadde det blitt 33×20 piksler — knapt synlig. Den stiplede ruten ved siden av viser den faktiske skalaen. Det illustrerer at småbedriftenes selskapsskatt er <strong>1 ut av hver 460. krone</strong> staten tar inn.</p>
+  </div>
+
+  <h3>Oversettelse til kjente referanser</h3>
+
+  <div class="references">
+    <p class="references-title">Hvor stort er egentlig hvert nivå i hverdagstermer?</p>
+    <p class="references-sub">Sammenligning med verifiserte offentlige utgiftsposter for 2024 (kilde: regjeringen.no, DFØ statsregnskapet, Forsvarsdepartementet)</p>
+
+    <div class="ref-row">
+      <span class="ref-amount">7 mrd.</span>
+      <span class="ref-desc">Småbedriftenes selskapsskatt. <strong>Omtrent like mye som</strong> hele NRKs årlige bevilgning over statsbudsjettet (7,2 mrd. i 2024 inkl. momskompensasjon).</span>
+    </div>
+    <div class="ref-row">
+      <span class="ref-amount">110 mrd.</span>
+      <span class="ref-desc">All selskapsskatt fra fastlandet. <strong>Litt mer enn</strong> hele forsvarsbudsjettet (90,8 mrd. saldert i 2024, oppjustert til ca. 104 mrd. i revidert nasjonalbudsjett — første gang over 100 mrd.).</span>
+    </div>
+    <div class="ref-row">
+      <span class="ref-amount">382 mrd.</span>
+      <span class="ref-desc">Petroleumsskatt. <strong>Litt mer enn</strong> alderspensjonen i folketrygden (316,7 mrd. i 2024) — eller godt over halvparten av folketrygdens totale utgifter (664 mrd.).</span>
+    </div>
+    <div class="ref-row">
+      <span class="ref-amount">1 079 mrd.</span>
+      <span class="ref-desc">All skatt på inntekt og formue. <strong>Tilsvarer 47 %</strong> av statsbudsjettets samlede utgifter inkl. SPU-overføring (2 309 mrd. i 2024 — kilde: SSB tabell 10486, statsregnskapet). Også ca. 1,6 ganger folketrygdens totale utgifter.</span>
+    </div>
+    <div class="ref-row">
+      <span class="ref-amount">3 218 mrd.</span>
+      <span class="ref-desc">Offentlig forvaltnings totale inntekter. <strong>1,4 ganger større</strong> enn statsbudsjettets samlede utgifter (2 309 mrd.) — fordi det inkluderer kommuner, fylker og folketrygdens egne inntekter. Se forklaringen under.</span>
+    </div>
+  </div>
+
+  <h3>Hvorfor er totalen større enn statsbudsjettet?</h3>
+
+  <div class="explain">
+    <p><strong>Statsbudsjettet er ikke det samme som offentlig forvaltning.</strong> Tallet 3 218 mrd. som vi har brukt gjennom hele dashboardet er offentlig forvaltning samlet — som er en bredere kategori enn det Stortinget vedtar i sitt årlige statsbudsjett.</p>
+    <p>Statsbudsjettets samlede utgifter for 2024 var <strong>2 309 mrd. kr</strong> inkl. petroleumsvirksomhet og netto overføring til Oljefondet (kilde: SSB tabell 10486 — statsregnskapet, oppdatert mars 2026). Offentlig forvaltning er <strong>3 218 mrd. kr</strong> i inntekter. Differansen på ca. 909 mrd. har to hovedforklaringer:</p>
+    <p><strong>1. Kommuner og fylkeskommuner har egne inntekter.</strong> Norske kommuner har skatteinntekter direkte fra innbyggerne (ca. 230 mrd. i kommuneskatt), ikke bare overføringer fra staten. Disse skattekronene går ikke gjennom statsbudsjettet, men inngår i SSBs definisjon av offentlig forvaltning.</p>
+    <p><strong>2. Folketrygden og andre sektorer har egne inntekter.</strong> Trygdeavgiften som lønnstakere betaler regnes som folketrygdens egen inntekt, ikke statlig skatt — selv om folketrygden formelt er del av staten. Tilsvarende har enkelte statlige forvaltningsbedrifter egne driftsinntekter.</p>
+    <p><strong>Budsjett vs. regnskap — viktig presisering:</strong> I det opprinnelige salderte budsjettet for 2024 (oktober 2023) anslo Finansdepartementet en netto avsetning til Oljefondet på 496 mrd., basert på en forventet petroleumsinntekt på 832 mrd. Det <em>faktiske regnskapet</em> for 2024 viser imidlertid bare 356 mrd. i netto avsetning, fordi (a) petroleumsinntektene ble lavere (745 mrd. faktisk vs. 832 mrd. budsjettert), og (b) oljepengebruken ble høyere (322 mrd. faktisk oljekorrigert underskudd vs. 336 mrd. budsjettert). NBIM rapporterer sin egen «tilførsel av kapital» til 409 mrd. (kassebasis) — avviket mellom regnskap (356) og NBIM-kassebasis (409) skyldes periodisering, og legges til overføringen påfølgende år.</p>
+  </div>
+
+  <div class="callout callout-info">
+    <p><strong>Hvor går overskuddet?</strong> I 2024 hadde offentlig forvaltning ca. <strong>3 218 mrd. i inntekter</strong> og <strong>2 441 mrd. i løpende utgifter</strong> — et overskudd på <strong>777 mrd. kr</strong> i nasjonalregnskapsoppgjør. Til sammenligning ble <strong>356 mrd. faktisk overført netto til SPU</strong> ifølge statsregnskapet (SSB tabell 10486), og NBIM rapporterer 409 mrd. som tilført fondet i 2024. Forskjellen mellom disse målene skyldes ulike definisjoner: nasjonalregnskapet (offentlig forvaltning) inkluderer pensjonsforpliktelser og kapitalinntekter på en annen måte enn statsregnskapet. Uansett målestokk er Norge unikt ved at offentlig sektor "sparer mer enn det bruker" — denne mekanismen er det som gjør at Oljefondet vokser hvert år.</p>
+  </div>
+</section>
+
+
+<!-- ============ OPPDATERING 2025 ============ -->
+<section id="oppdatering-2025">
+  <h2>Oppdatering 2025 — hva har endret seg?</h2>
+  <p class="section-meta">Faktiske regnskapstall for 2025 (SSB tabell 14668 og 10486, oppdatert mars 2026)</p>
+
+  <p>Alle dashboardets hovedanalyser er basert på inntektsåret 2024 — som var det siste komplette året da første versjon ble laget. SSB har siden publisert reviderte 2025-tall (mars 2026), og <strong>Statsrekneskapen 2025</strong> fra Finansdepartementet ble lagt fram 24. april 2026. Tallene under er <strong>faktiske regnskapstall</strong> som er kryssjekket mot tre uavhengige offisielle kilder: SSB tabell 14668 og 10486, Statsrekneskapen 2025 fra regjeringen.no, og DFØ statsregnskapet.no.</p>
+
+  <h3>Hovedstrømmene — hvordan utviklet 2025 seg?</h3>
+
+  <div class="year-compare">
+    <div class="year-compare-row header">
+      <span>Post</span>
+      <span class="y2024">2024</span>
+      <span class="arrow"></span>
+      <span class="y2025">2025</span>
+      <span class="change">Endring</span>
+    </div>
+    <div class="year-compare-row">
+      <span class="label">Offentlig forvaltning, totale inntekter
+        <small>SSB tabell 14668</small>
+      </span>
+      <span class="y2024">3 218</span>
+      <span class="arrow">→</span>
+      <span class="y2025">3 264</span>
+      <span class="change up">+1,4 %</span>
+    </div>
+    <div class="year-compare-row">
+      <span class="label">Offentlig forvaltning, løpende utgifter
+        <small>SSB tabell 14668</small>
+      </span>
+      <span class="y2024">2 441</span>
+      <span class="arrow">→</span>
+      <span class="y2025">2 605</span>
+      <span class="change up">+6,7 %</span>
+    </div>
+    <div class="year-compare-row">
+      <span class="label">Skatt på inntekt og formue
+        <small>Hovedfokus i dashboardet</small>
+      </span>
+      <span class="y2024">1 079</span>
+      <span class="arrow">→</span>
+      <span class="y2025">1 080</span>
+      <span class="change flat">+0,1 %</span>
+    </div>
+    <div class="year-compare-row">
+      <span class="label">Petroleumsskatt total
+        <small>Ordinær 22 % + særskatt 71,8 %</small>
+      </span>
+      <span class="y2024">382</span>
+      <span class="arrow">→</span>
+      <span class="y2025">343</span>
+      <span class="change down">−10,2 %</span>
+    </div>
+    <div class="year-compare-row">
+      <span class="label">Selskapsskatt fastland
+        <small>Ordinær 22 % på fastlandsnæringer</small>
+      </span>
+      <span class="y2024">110</span>
+      <span class="arrow">→</span>
+      <span class="y2025">115</span>
+      <span class="change up">+4,5 %</span>
+    </div>
+    <div class="year-compare-row">
+      <span class="label">Grunnrenteskatt utenom petroleum
+        <small>Vannkraft, havbruk, vindkraft</small>
+      </span>
+      <span class="y2024">17,1</span>
+      <span class="arrow">→</span>
+      <span class="y2025">20,5</span>
+      <span class="change up">+19,9 %</span>
+    </div>
+    <div class="year-compare-row">
+      <span class="label">Merverdiavgift (MVA)
+        <small>Speiler økonomisk aktivitet</small>
+      </span>
+      <span class="y2024">387</span>
+      <span class="arrow">→</span>
+      <span class="y2025">401</span>
+      <span class="change up">+3,7 %</span>
+    </div>
+    <div class="year-compare-row">
+      <span class="label">Avgifter totalt
+        <small>MVA + særavgifter (motorvogn, alkohol, tobakk)</small>
+      </span>
+      <span class="y2024">528</span>
+      <span class="arrow">→</span>
+      <span class="y2025">548</span>
+      <span class="change up">+3,7 %</span>
+    </div>
+  </div>
+
+  <p style="font-size: 12px; color: var(--text-3); margin-top: 0.5rem;">Alle beløp i milliarder kroner. Tallene for 2025 er <span class="badge regnskap">REGNSKAP</span> (foreløpig regnskap fra SSB, mars 2026).</p>
+
+  <h3>Statsbudsjettet — fra anslag til regnskap</h3>
+
+  <p>Statsbudsjettet rapporteres i flere stadier gjennom året. Her er hvordan 2024 og 2025 ser ut:</p>
+
+  <div class="year-compare">
+    <div class="year-compare-row header">
+      <span>Mål</span>
+      <span class="y2024">2024</span>
+      <span class="arrow"></span>
+      <span class="y2025">2025</span>
+      <span class="change">Status</span>
+    </div>
+    <div class="year-compare-row">
+      <span class="label">Statsbudsjett — utgifter i alt
+        <small>SSB tabell 10486 (statsregnskapet)</small>
+      </span>
+      <span class="y2024">1 953</span>
+      <span class="arrow">→</span>
+      <span class="y2025">2 101</span>
+      <span class="change"><span class="badge regnskap">REGNSKAP</span></span>
+    </div>
+    <div class="year-compare-row">
+      <span class="label">Statsbudsjett — inntekter i alt
+        <small>Inkl. petroleumsinntekter</small>
+      </span>
+      <span class="y2024">2 324</span>
+      <span class="arrow">→</span>
+      <span class="y2025">2 290</span>
+      <span class="change"><span class="badge regnskap">REGNSKAP</span></span>
+    </div>
+    <div class="year-compare-row">
+      <span class="label">Netto avsetning til SPU
+        <small>Det som faktisk ble lagt til Oljefondet via statsregnskap</small>
+      </span>
+      <span class="y2024">356</span>
+      <span class="arrow">→</span>
+      <span class="y2025">184</span>
+      <span class="change"><span class="badge regnskap">REGNSKAP</span></span>
+    </div>
+    <div class="year-compare-row">
+      <span class="label">Statsbudsjett — total inkl. SPU
+        <small>Utgifter + SPU-avsetning</small>
+      </span>
+      <span class="y2024">2 309</span>
+      <span class="arrow">→</span>
+      <span class="y2025">2 285</span>
+      <span class="change"><span class="badge regnskap">REGNSKAP</span></span>
+    </div>
+  </div>
+
+  <h3>Statsbudsjett 2026 — saldert anslag (kun til orientering)</h3>
+
+  <p>Stortinget vedtok statsbudsjettet for 2026 i desember 2025. Her er anslagene fra Finansdepartementet — disse er <strong>budsjettert, ikke regnskap</strong>, og endelige tall vil først foreligge våren 2027.</p>
+
+  <div class="year-compare">
+    <div class="year-compare-row header">
+      <span>Post (anslag)</span>
+      <span class="y2024">2025 regnskap</span>
+      <span class="arrow"></span>
+      <span class="y2025">2026 budsjett</span>
+      <span class="change">Endring</span>
+    </div>
+    <div class="year-compare-row">
+      <span class="label">Statsbudsjett — utgifter inkl. petro
+        <small>Kilde: regjeringen.no, oktober 2025</small>
+      </span>
+      <span class="y2024">2 101</span>
+      <span class="arrow">→</span>
+      <span class="y2025">2 201 <span class="badge budsjett">BUDSJETT</span></span>
+      <span class="change up">+4,8 %</span>
+    </div>
+    <div class="year-compare-row">
+      <span class="label">Inntekter ekskl. petroleum
+        <small>Kilde: regjeringen.no, oktober 2025</small>
+      </span>
+      <span class="y2024">1 578</span>
+      <span class="arrow">→</span>
+      <span class="y2025">1 712 <span class="badge budsjett">BUDSJETT</span></span>
+      <span class="change up">+8,5 %</span>
+    </div>
+    <div class="year-compare-row">
+      <span class="label">Forsvar
+        <small>Inkl. Nansen-programmet for Ukraina</small>
+      </span>
+      <span class="y2024">~120</span>
+      <span class="arrow">→</span>
+      <span class="y2025">180 <span class="badge budsjett">BUDSJETT</span></span>
+      <span class="change up">+50 %</span>
+    </div>
+    <div class="year-compare-row">
+      <span class="label">Folketrygden — alderspensjon
+        <small>Hovedpost i 2026-budsjettet</small>
+      </span>
+      <span class="y2024">~330</span>
+      <span class="arrow">→</span>
+      <span class="y2025">352 <span class="badge budsjett">BUDSJETT</span></span>
+      <span class="change up">+6,7 %</span>
+    </div>
+  </div>
+
+  <p style="font-size: 12px; color: var(--text-3); margin-top: 0.5rem;">2025-tall er foreløpig regnskap fra SSB. 2026-tall er saldert budsjett vedtatt av Stortinget desember 2025.</p>
+
+  <h3>Hva betyr dette for hovedanalysen?</h3>
+
+  <div class="callout callout-info">
+    <p><strong>Hovedkonklusjonene står seg.</strong> Skatt på inntekt og formue var nesten identisk i 2024 og 2025 (1 079 vs 1 080 mrd.), og selskapsskatten fastland varierer kun marginalt (110 vs 115 mrd.). Småbedriftenes estimerte bidrag steg fra 7,0 til 7,3 mrd. — fortsatt under 0,3 % av offentlige inntekter.</p>
+    <p><strong>Det viktige skiftet er petroleum.</strong> Petroleumsskatten falt 39 mrd. fra 2024 til 2025 (382 → 343), og SPU-avsetningen halverte seg (356 → 184). Norge bruker stadig mer av oljepengene, og avsetter mindre til fondet. Avkastningen i fondet (2 511 mrd. i 2024 ifølge NBIM) er nå viktigere enn de løpende petroleumsinntektene.</p>
+    <p><strong>Det skjeve forholdet mellom selskap og bidrag består.</strong> 30 petroleumsselskap betaler fortsatt mer enn 50 ganger så mye som 593 777 småbedrifter samlet, selv etter at petroleumsskatten har falt to år på rad.</p>
+  </div>
+
+  <h3>Statsrekneskapen 2025 — nye nøkkeltall (publisert 24. april 2026)</h3>
+
+  <div class="callout callout-success">
+    <p><strong>Oljepengebruken hopper kraftig opp.</strong> Det oljekorrigerte underskuddet — bruken av fondsmidler — steg fra 332 mrd. (2024) til <strong>475,7 mrd. (2025)</strong>. Det er en økning på 144 mrd. kroner, eller <strong>+43 %</strong>. Dette er det mest dramatiske ettårsspranget i oljepengebruken siden pandemiåret 2020. Hovedforklaringer: Nansen-programmet for Ukraina, økt forsvarsbudsjett, og generell utgiftsvekst.</p>
+    <p><strong>Statsbudsjettet i balanse — men i et nytt regime.</strong> Statsbudsjettet før lånetransaksjoner endte med et overskudd på <strong>4,5 mrd. kroner</strong> i 2025, fordi overføringen fra SPU (480,2 mrd.) nesten eksakt matchet det oljekorrigerte underskuddet. Norge har gått fra "sparer mer enn vi bruker" til en likevekt der løpende petroleumsinntekter dekker løpende oljepengebruk — første gang i nyere historie.</p>
+    <p><strong>SPU passerte 21 000 mrd.</strong> Markedsverdien av Statens pensjonsfond utland var <strong>21 258 mrd. kroner</strong> ved utgangen av 2025, opp fra 19 742 mrd. i 2024. Vekst: 1 522,7 mrd. Av dette var avkastning og urealiserte gevinster 1 940 mrd., kronekursen reduserte verdien med 1 155 mrd., og netto kapitalstrøm fra staten var ca. 184 mrd. Samlet pensjonsfond inkl. SPN: 21 675 mrd.</p>
+    <p><strong>Overskuddet i Statens pensjonsfond falt 143 mrd.</strong> Fra 778 mrd. (2024) til 634,6 mrd. (2025). Forklaringen er to motvirkende krefter: lavere netto petroleumsinntekter og høyere uttak til statsbudsjettet trakk ned (−172 mrd.), mens renter og utbytte i fondet steg fra 422 til 462 mrd. (+40 mrd.).</p>
+  </div>
+
+  <h3>Kildedokumentasjon for 2025-tall</h3>
+
+  <p>Hver enkelt tall i denne seksjonen er kryssjekket mot minst to uavhengige offisielle kilder. Her er triangulering for de viktigste:</p>
+
+  <table class="data" style="font-size: 12px;">
+    <thead>
+      <tr>
+        <th>Tall</th>
+        <th class="num">SSB</th>
+        <th class="num">DFØ</th>
+        <th class="num">Statsrekneskapen 2025</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Off. forvaltning, inntekter</td>
+        <td class="num">3 264</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td><span class="badge regnskap">SSB 14668</span></td>
+      </tr>
+      <tr>
+        <td>Statsbudsjett utgifter</td>
+        <td class="num">2 101</td>
+        <td class="num">2 101</td>
+        <td class="num">~2 101</td>
+        <td><span class="badge regnskap">3 KILDER</span></td>
+      </tr>
+      <tr>
+        <td>Netto avsetning til SPU</td>
+        <td class="num">184</td>
+        <td class="num">184</td>
+        <td class="num">~188</td>
+        <td><span class="badge regnskap">3 KILDER</span></td>
+      </tr>
+      <tr>
+        <td>Oljekorrigert underskudd</td>
+        <td class="num">—</td>
+        <td class="num">476</td>
+        <td class="num">475,7</td>
+        <td><span class="badge regnskap">2 KILDER</span></td>
+      </tr>
+      <tr>
+        <td>Netto kontantstrøm petroleum</td>
+        <td class="num">—</td>
+        <td class="num">664</td>
+        <td class="num">~664</td>
+        <td><span class="badge regnskap">2 KILDER</span></td>
+      </tr>
+      <tr>
+        <td>Skatt på inntekt og formue</td>
+        <td class="num">1 080</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td><span class="badge regnskap">SSB 14668</span></td>
+      </tr>
+      <tr>
+        <td>Petroleumsskatt total</td>
+        <td class="num">343</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td><span class="badge regnskap">SSB 14668</span></td>
+      </tr>
+      <tr>
+        <td>Selskapsskatt fastland</td>
+        <td class="num">114,5</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td><span class="badge regnskap">SSB 14668</span></td>
+      </tr>
+      <tr>
+        <td>Grunnrenteskatt</td>
+        <td class="num">20,5</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td><span class="badge regnskap">SSB 14668</span></td>
+      </tr>
+      <tr>
+        <td>MVA</td>
+        <td class="num">401</td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td><span class="badge regnskap">SSB 14668</span></td>
+      </tr>
+      <tr>
+        <td>SPU markedsverdi 31.12.2025</td>
+        <td class="num">—</td>
+        <td class="num">21 258</td>
+        <td class="num">21 257,8</td>
+        <td><span class="badge regnskap">2 KILDER</span></td>
+      </tr>
+      <tr>
+        <td>Renter/utbytte SPU+SPN</td>
+        <td class="num">—</td>
+        <td class="num">462</td>
+        <td class="num">462</td>
+        <td><span class="badge regnskap">2 KILDER</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p style="font-size: 11px; color: var(--text-3); margin-top: 0.5rem;">Alle tall i mrd. kr. SSB tabell 14668 publisert 5. mars 2026; tabell 10486 publisert 9. mars 2026. DFØ statsregnskapet.no oppdatert vinter/vår 2026. Statsrekneskapen 2025 (Meld. St. 3 (2025–2026)) lagt fram 24. april 2026 av Finansdepartementet. Mindre avvik mellom kildene (1–4 mrd.) skyldes ulike definisjoner og periodiseringsmetoder, ikke feil i tallene.</p>
+</section>
+
+
+<!-- ============ EIERBESKATNING ============ -->
+<section id="eierskatt">
+  <h2>Formuesskatt, utbytteskatt og «nullskatteyter»-debatten</h2>
+  <p class="section-meta">Eierskattenes rolle i norsk skattesystem — basert på SSB tabell 08231, 08815 og 07758, samt Civita- og LO-perspektiver</p>
+
+  <p>Formuesskatt og utbytteskatt er de to mest debatterte skattene i Norge — og blant de minste i provenystørrelse. Sammen utgjør de ca. <strong>63 mrd. kr (2024)</strong> — under 6 % av statens skatteinntekter på 1 079 mrd. kr fra inntekt og formue. Men debatten om hvem som faktisk betaler dem, og påstanden om «nullskatteytere», er spesielt het. Denne seksjonen presenterer faktagrunnlaget fra SSB med to ulike politiske perspektiver.</p>
+
+  <h3>Hvem betaler formuesskatt?</h3>
+
+  <p>I 2024 betalte <strong>701 482 personer</strong> formuesskatt — det er 15,4 % av alle bosatte over 17 år. Total formuesskatt: <strong>31,8 mrd. kr</strong>. Snitt per skattebetaler: ca. 45 000 kr. Men fordelingen er ekstremt skjev:</p>
+
+  <p style="font-size:12px;color:var(--text-3);border-left:3px solid var(--accent-grunnrente);padding-left:12px;background:var(--surface-2);padding:8px 12px;border-radius:6px">
+    <strong>Kildemerknad (formuesskatt).</strong> Tallet oppgis to steder med ulik, men begge korrekte, SSB-kilder: <strong>31,8 mrd</strong> er nasjonalregnskapets påløpte tall (SSB tabell 14668, post A1141), mens <strong>~31,1 mrd</strong> er skattestatistikkens fastsatte tall som ligger til grunn for tidsserien og betalertabellen lenger ned (der proveny = antall betalere × snitt). Differansen er måleteknisk (~2 %). Fordelingstallene i denne seksjonen (28,6 %, snitt ~45 000 kr) er beregnet på 31,8-basis.</p>
+
+  <div class="dist-bar">
+    <div class="dist-bar-row">
+      <span class="dist-bar-label">1–9 999 kr (snitt 4 100 kr)</span>
+      <div class="dist-bar-track"><div class="dist-bar-fill" style="width: 100%;"></div></div>
+      <span class="dist-bar-value">313 434</span>
+    </div>
+    <div class="dist-bar-row">
+      <span class="dist-bar-label">10 000–24 999 kr</span>
+      <div class="dist-bar-track"><div class="dist-bar-fill" style="width: 56.8%;"></div></div>
+      <span class="dist-bar-value">178 023</span>
+    </div>
+    <div class="dist-bar-row">
+      <span class="dist-bar-label">25 000–49 999 kr</span>
+      <div class="dist-bar-track"><div class="dist-bar-fill" style="width: 33.7%;"></div></div>
+      <span class="dist-bar-value">105 635</span>
+    </div>
+    <div class="dist-bar-row">
+      <span class="dist-bar-label">50 000–99 999 kr</span>
+      <div class="dist-bar-track"><div class="dist-bar-fill" style="width: 18.7%;"></div></div>
+      <span class="dist-bar-value">58 717</span>
+    </div>
+    <div class="dist-bar-row">
+      <span class="dist-bar-label">100 000–349 999 kr</span>
+      <div class="dist-bar-track"><div class="dist-bar-fill warning" style="width: 14.5%;"></div></div>
+      <span class="dist-bar-value">~46 000</span>
+    </div>
+    <div class="dist-bar-row">
+      <span class="dist-bar-label">350 000–999 999 kr</span>
+      <div class="dist-bar-track"><div class="dist-bar-fill warning" style="width: 2.3%;"></div></div>
+      <span class="dist-bar-value">7 193</span>
+    </div>
+    <div class="dist-bar-row">
+      <span class="dist-bar-label"><strong>Over 1 mill. kr</strong> (snitt 3,2 mill. kr)</span>
+      <div class="dist-bar-track"><div class="dist-bar-fill warning" style="width: 0.9%;"></div></div>
+      <span class="dist-bar-value">2 838</span>
+    </div>
+  </div>
+
+  <p style="font-size: 12px; color: var(--text-3);">Bredde viser antall personer i hvert intervall. Kilde: SSB tabell 08231.</p>
+
+  <div class="callout callout-info">
+    <p><strong>Konsentrasjon i toppen.</strong> De 2 838 personene som betaler over 1 mill. kr i formuesskatt har en gjennomsnittlig nettoformue på <strong>296,8 mill. kr</strong> hver, og bidrar med ca. <strong>9,1 mrd. kr</strong> — eller <strong>28,6 %</strong> av all formuesskatt. De 0,5 % øverste betaler altså nesten en tredjedel. Men flertallet (70 %) betaler under 25 000 kr i året.</p>
+  </div>
+
+  <h3>Hva består formuen av?</h3>
+
+  <p>Formuesskatten skattlegger nettoformue (eiendeler − gjeld) over et bunnfradrag. Men hva består «formuen» faktisk av? Av total skattepliktig bruttoformue på <strong>8 292 mrd. kr</strong> i 2024 (SSB 08815):</p>
+
+  <div class="dist-bar">
+    <div class="dist-bar-row">
+      <span class="dist-bar-label">Primærbolig</span>
+      <div class="dist-bar-track"><div class="dist-bar-fill purple" style="width: 100%;"></div></div>
+      <span class="dist-bar-value">2 186 mrd. (26,4 %)</span>
+    </div>
+    <div class="dist-bar-row">
+      <span class="dist-bar-label">Verdipapirer (aksjer/fond)</span>
+      <div class="dist-bar-track"><div class="dist-bar-fill warning" style="width: 87%;"></div></div>
+      <span class="dist-bar-value">1 900 mrd. (22,9 %)</span>
+    </div>
+    <div class="dist-bar-row">
+      <span class="dist-bar-label">Bankinnskudd</span>
+      <div class="dist-bar-track"><div class="dist-bar-fill" style="width: 80%;"></div></div>
+      <span class="dist-bar-value">1 757 mrd. (21,2 %)</span>
+    </div>
+    <div class="dist-bar-row">
+      <span class="dist-bar-label">Sekundærbolig</span>
+      <div class="dist-bar-track"><div class="dist-bar-fill purple" style="width: 44%;"></div></div>
+      <span class="dist-bar-value">968 mrd. (11,7 %)</span>
+    </div>
+    <div class="dist-bar-row">
+      <span class="dist-bar-label">Annen finanskapital</span>
+      <div class="dist-bar-track"><div class="dist-bar-fill" style="width: 33%;"></div></div>
+      <span class="dist-bar-value">~742 mrd. (8,9 %)</span>
+    </div>
+    <div class="dist-bar-row">
+      <span class="dist-bar-label">Annen fast eiendom/skog</span>
+      <div class="dist-bar-track"><div class="dist-bar-fill purple" style="width: 16%;"></div></div>
+      <span class="dist-bar-value">~354 mrd. (4,3 %)</span>
+    </div>
+    <div class="dist-bar-row">
+      <span class="dist-bar-label">Næringseiendom/driftsløsøre</span>
+      <div class="dist-bar-track"><div class="dist-bar-fill warning" style="width: 3%;"></div></div>
+      <span class="dist-bar-value">62 mrd. (0,7 %)</span>
+    </div>
+  </div>
+
+  <p style="font-size: 12px; color: var(--text-3);">Kilde: SSB tabell 08815, 2024. Verdipapirer inkluderer både børsnoterte og unoterte aksjer (kategori "Verdipapirer i og utenfor VPS"). Næringseiendom har ulik verdsettelsesrabatt enn primærbolig.</p>
+
+  <p>Verdipapirer (aksjer og fond) utgjør <strong>22,9 %</strong> av all formue — nesten like mye som bankinnskudd (21,2 %). Det er denne posten som er sentral i debatten: aksjer i norske bedrifter beskattes som privat formue hos eieren, mens utenlandske eiere ikke betaler tilsvarende skatt. Verdsettelsesrabatten på aksjer er 20 % i 2024 (man skatter 80 % av markedsverdien), mens primærbolig har 75 % rabatt opp til 10 mill. kr.</p>
+
+  <h3>Hvem betaler utbytteskatt?</h3>
+
+  <p>Utbytte fra norske aksjeselskaper beskattes hos eieren med en effektiv sats på 37,84 % (22 % × oppjusteringsfaktor 1,72 i 2024). I 2024 mottok <strong>368 541 personer</strong> faktisk utbytte. Total mottatt utbytte: <strong>85 mrd. kr</strong>. Beregnet utbytteskatt-proveny: ca. <strong>31 mrd. kr</strong>. Konsentrasjonen er enda mer ekstrem enn for formuesskatten:</p>
+
+  <div class="dist-bar">
+    <div class="dist-bar-row">
+      <span class="dist-bar-label">1–49 999 kr</span>
+      <div class="dist-bar-track"><div class="dist-bar-fill" style="width: 100%;"></div></div>
+      <span class="dist-bar-value">278 905 (75,7 %)</span>
+    </div>
+    <div class="dist-bar-row">
+      <span class="dist-bar-label">50 000–499 999 kr</span>
+      <div class="dist-bar-track"><div class="dist-bar-fill" style="width: 21%;"></div></div>
+      <span class="dist-bar-value">59 123 (16,0 %)</span>
+    </div>
+    <div class="dist-bar-row">
+      <span class="dist-bar-label">500 000–999 999 kr</span>
+      <div class="dist-bar-track"><div class="dist-bar-fill warning" style="width: 4.4%;"></div></div>
+      <span class="dist-bar-value">12 357 (3,4 %)</span>
+    </div>
+    <div class="dist-bar-row">
+      <span class="dist-bar-label">1–2 mill. kr</span>
+      <div class="dist-bar-track"><div class="dist-bar-fill warning" style="width: 3.2%;"></div></div>
+      <span class="dist-bar-value">9 064 (2,5 %)</span>
+    </div>
+    <div class="dist-bar-row">
+      <span class="dist-bar-label">2–7,5 mill. kr</span>
+      <div class="dist-bar-track"><div class="dist-bar-fill warning" style="width: 2.4%;"></div></div>
+      <span class="dist-bar-value">6 524 (1,8 %)</span>
+    </div>
+    <div class="dist-bar-row">
+      <span class="dist-bar-label"><strong>Over 7,5 mill. kr</strong></span>
+      <div class="dist-bar-track"><div class="dist-bar-fill warning" style="width: 0.6%;"></div></div>
+      <span class="dist-bar-value">1 594 (0,4 %)</span>
+    </div>
+  </div>
+
+  <div class="callout callout-info">
+    <p><strong>Ekstrem konsentrasjon.</strong> De 1 594 personene som mottok over 7,5 mill. kr i utbytte (0,4 % av utbyttemottakere) mottok til sammen <strong>26,8 mrd. kr</strong> — det er <strong>31,5 % av all utbytte</strong> i Norge. Tar vi alle med utbytte over 500 000 kr, snakker vi om <strong>29 539 personer (8 %)</strong> som mottok 81 % av all utbytte.</p>
+  </div>
+
+  <h3>«Nullskatteyter»-debatten — hva sier tallene?</h3>
+
+  <p>I juli 2024 publiserte SSB en rapport som ble sentral i debatten: <strong>24 800 personer</strong> betalte formuesskatt, men ingen inntektsskatt, i 2022. Av disse hadde 230 personer formue over 50 mill. kr. Klassekampen og finansminister Vedum brukte tallet som bevis på at velstående «nullskatteytere» unngår å betale skatt. Civita (Mathilde Fasting) avviste dette med en mer detaljert analyse:</p>
+
+  <div class="perspective-grid">
+    <div class="perspective-card lo">
+      <p class="source-tag">Klassekampen / LO / Vedum</p>
+      <h4>Det finnes velstående nullskatteytere</h4>
+      <p>SSB-rapporten viser at <strong>230 personer</strong> med formue over 50 mill. kr ikke betalte inntektsskatt i 2022. Formuesskatten er den eneste «siste skanse» som sørger for at de superrike bidrar.</p>
+      <p>Hvis formuesskatten avskaffes vil 27 600 nye nullskatteytere oppstå (TV2/SSB-analyse, 2026), inkludert 200 personer med formue over 50 mill. kr.</p>
+      <p>Formue er ekstremt skjevt fordelt: De 10 % rikeste sitter på halvparten av all formue, og de 0,1 % rikeste sitter på 10 %. Formuesskatten bidrar med 30+ mrd. kr og er nødvendig for å motvirke ulikhet.</p>
+      <p style="font-size: 11px; color: var(--text-3);">Kilde: Klassekampen 12.07.2024; LO; TV2 «Norges 470 rikeste» (april 2026)</p>
+    </div>
+    <div class="perspective-card civita">
+      <p class="source-tag">Civita / Mathilde Fasting</p>
+      <h4>Begrepet er villedende</h4>
+      <p>Av de 24 800 «nullskatteyterne» har <strong>22 400 (90 %)</strong> formue under 10 mill. kr — typisk pensjonerte kvinner som lignes sammen med ektefelle. <strong>16 400 (66 %)</strong> har så lav alderspensjon at skattefradraget for pensjon fjerner all inntektsskatt.</p>
+      <p>Av de 500 personene med formue over 25 mill. kr som «kun betalte formuesskatt» i 2022, betalte 60 % inntektsskatt i 2021 og 70 % i 2018-2019. Permanent nullskatteyter med formue er praktisk talt umulig.</p>
+      <p>Formuesskatten betales i realiteten med <em>utbytte</em> som tas ut fra bedriften — som så beskattes med 37,84 % utbytteskatt. Norske eiere har en konkurranseulempe mot utenlandske eiere som ikke betaler norsk formueskatt.</p>
+      <p style="font-size: 11px; color: var(--text-3);">Kilde: Civita-notat «Nullskatteytere flest er ikke rike» (jan 2025); SSB-data; BI-analyse</p>
+    </div>
+  </div>
+
+  <h3>Hva handler debatten egentlig om? — seks faktasjekkede påstander</h3>
+
+  <div class="callout callout-success">
+    <p><strong>1. Hvor stor er formuesskatten?</strong> 31,8 mrd. kr (2024) — utgjør 1 % av offentlig forvaltnings totale inntekter, og 3 % av all skatt på inntekt og formue. Selv om den er politisk omstridt, er den proveniumssammenheng beskjeden.</p>
+    <p><strong>2. Hvem betaler den?</strong> 701 482 personer — 15,4 % av befolkningen. Men 28,6 % av provenyet kommer fra de 0,5 % øverste (2 838 personer med over 1 mill. kr i formuesskatt).</p>
+    <p><strong>3. Er den en «bedriftsskatt»?</strong> Delvis. 22,9 % av total formue består av verdipapirer (aksjer og fond). Av næringskapital er 0,7 % i driftsløsøre. Resten er i verdier mange ikke ville kalt «bedrifter»: bankinnskudd, primærbolig, sekundærbolig.</p>
+    <p><strong>4. Eksisterer «velstående nullskatteytere»?</strong> Ja, men i et lite antall. SSB identifiserte 230 personer med formue over 50 mill. kr som kun betalte formuesskatt i 2022. Civita-analysen viser at de fleste også betaler inntektsskatt over tid (8 av 11 år), men noen kan tilpasse seg gjennom utbyttetidspunkter.</p>
+    <p><strong>5. Konkurranseulempe for norske eiere?</strong> Ja. Utenlandske eiere som investerer i Norge betaler kun selskapsskatt (22 %), ikke formuesskatt eller utbytteskatt. Civita-rapport (NyAnalyse/BI) viser at norskeide bedrifter tar ut nesten dobbelt så mye utbytte som utenlandskeide bedrifter — som tolkes som konsekvens av formuesskattbelastningen.</p>
+    <p><strong>6. Politisk realitet 2025–2026.</strong> Bunnfradraget er 1,76 mill. kr (2024). Verdsettelsesrabatten på aksjer er 20 %. Effektiv utbytteskatt er 37,84 %. Stortinget vedtok mindre justeringer i 2025-budsjettet, og en større skattereform er varslet i 2027.</p>
+  </div>
+
+  <h3>Historisk utvikling 2005–2024 — sterk vekst i eierbeskatningen</h3>
+
+  <p>Eierbeskatningen har vokst betydelig de siste 20 årene. Formuesskatten er <strong>3,6 ganger større</strong> i kroner i 2024 enn i 2005, og utbytteskatten har vokst <strong>5,7 ganger</strong> siden 2007. Veksten skyldes politiske valg — skattereformer, oppjusteringsfaktorer, satsendringer og endringer i verdsettelsesregler.</p>
+
+  <div class="timeseries-card">
+    <div class="ts-header">
+      <p class="ts-title">Formuesskatt — proveny 2005–2024 (mrd. kr)</p>
+      <span class="ts-current">31,1 mrd. (2024)</span>
+    </div>
+    <p class="ts-change">2005: 8,7 → 2014: 13,4 → 2020: 16,9 → 2022: 25,9 → 2024: 31,1 mrd. Tredoblet på 20 år. Største sprang i 2022 (+53 % fra 2021) etter Støre-regjeringens skjerpelse.</p>
+    <svg class="ts-svg" viewBox="0 0 500 60" preserveAspectRatio="none" role="img" aria-label="Tidsserie formuesskatt 2005-2024">
+      <polyline fill="none" stroke="#534AB7" stroke-width="2" points="20,55 97,48 173,45 250,40 327,37 403,17 480,5"/>
+      <circle cx="20" cy="55" r="3" fill="#534AB7"/>
+      <circle cx="97" cy="48" r="3" fill="#534AB7"/>
+      <circle cx="173" cy="45" r="3" fill="#534AB7"/>
+      <circle cx="250" cy="40" r="3" fill="#534AB7"/>
+      <circle cx="327" cy="37" r="3" fill="#534AB7"/>
+      <circle cx="403" cy="17" r="3" fill="#534AB7"/>
+      <circle cx="480" cy="5" r="4" fill="#534AB7" stroke="var(--bg)" stroke-width="1.5"/>
+    </svg>
+    <div class="ts-axis"><span>2005</span><span>2010</span><span>2014</span><span>2018</span><span>2020</span><span>2022</span><span>2024</span></div>
+  </div>
+
+  <div class="timeseries-card">
+    <div class="ts-header">
+      <p class="ts-title">Utbytte mottatt av personer 2007–2024 (mrd. kr)</p>
+      <span class="ts-current">85,1 mrd. (2024)</span>
+    </div>
+    <p class="ts-change">2007: 15 → 2014: 39 → 2020: 64 → <strong>2021: 146 (rekord, før skattereformen)</strong> → 2024: 85 mrd. Det store spranget i 2021 skyldes at bedriftseiere tok ut utbytter før Solberg-regjeringens varslede satsøkning.</p>
+    <svg class="ts-svg" viewBox="0 0 500 60" preserveAspectRatio="none" role="img" aria-label="Tidsserie utbytte 2007-2024">
+      <polyline fill="none" stroke="#D85A30" stroke-width="2" points="20,55 78,50 135,46 192,38 250,36 308,5 365,34 422,30 480,28"/>
+      <circle cx="20" cy="55" r="3" fill="#D85A30"/>
+      <circle cx="78" cy="50" r="3" fill="#D85A30"/>
+      <circle cx="135" cy="46" r="3" fill="#D85A30"/>
+      <circle cx="192" cy="38" r="3" fill="#D85A30"/>
+      <circle cx="250" cy="36" r="3" fill="#D85A30"/>
+      <circle cx="308" cy="5" r="4" fill="#D85A30"/>
+      <circle cx="365" cy="34" r="3" fill="#D85A30"/>
+      <circle cx="422" cy="30" r="3" fill="#D85A30"/>
+      <circle cx="480" cy="28" r="4" fill="#D85A30" stroke="var(--bg)" stroke-width="1.5"/>
+    </svg>
+    <div class="ts-axis"><span>2007</span><span>2010</span><span>2014</span><span>2018</span><span>2020</span><span>2021</span><span>2022</span><span>2023</span><span>2024</span></div>
+  </div>
+
+  <h4>Antall personer som betaler formuesskatt 2005–2024</h4>
+
+  <p>Antallet betalere har svingt sterkt — drevet av bunnfradraget, ikke av faktisk formue:</p>
+
+  <table class="data" style="font-size: 12px;">
+    <thead>
+      <tr>
+        <th>År</th>
+        <th class="num">Antall betalere</th>
+        <th class="num">Proveny (mrd.)</th>
+        <th class="num">Snitt per betaler</th>
+        <th>Politisk kontekst</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>2005</td>
+        <td class="num">1 175 706</td>
+        <td class="num">8,7</td>
+        <td class="num">7 400 kr</td>
+        <td>Bondevik II — bredt grunnlag, lave satser</td>
+      </tr>
+      <tr>
+        <td>2008</td>
+        <td class="num">862 985</td>
+        <td class="num">~10,8</td>
+        <td class="num">~12 500 kr</td>
+        <td>Stoltenberg II — bunnfradrag økes</td>
+      </tr>
+      <tr>
+        <td>2010</td>
+        <td class="num">746 860</td>
+        <td class="num">11,9</td>
+        <td class="num">15 900 kr</td>
+        <td>Stoltenberg II — videre justeringer</td>
+      </tr>
+      <tr>
+        <td>2014</td>
+        <td class="num">~615 000</td>
+        <td class="num">13,4</td>
+        <td class="num">~21 800 kr</td>
+        <td>Solberg I — start på reduksjon</td>
+      </tr>
+      <tr>
+        <td>2017</td>
+        <td class="num">498 041</td>
+        <td class="num">15,3</td>
+        <td class="num">~30 800 kr</td>
+        <td>Solberg II — laveste antall betalere</td>
+      </tr>
+      <tr>
+        <td>2020</td>
+        <td class="num">572 224</td>
+        <td class="num">16,9</td>
+        <td class="num">29 600 kr</td>
+        <td>Solberg II — pandemiåret</td>
+      </tr>
+      <tr>
+        <td>2022</td>
+        <td class="num">647 591</td>
+        <td class="num">25,9</td>
+        <td class="num">39 900 kr</td>
+        <td>Støre I — første år med skjerpelse</td>
+      </tr>
+      <tr class="total">
+        <td>2024</td>
+        <td class="num">701 482</td>
+        <td class="num">31,1</td>
+        <td class="num">44 400 kr</td>
+        <td>Støre I — rekordnivå proveny</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p style="font-size: 11px; color: var(--text-3);">Kilde: SSB tabell 08815. Antall betalere viser bosatte personer 17 år+ med formuesskatt. Snitt = proveny/antall.</p>
+
+  <h4>Hva forklarer veksten?</h4>
+
+  <div class="callout callout-success">
+    <p><strong>1. Børsverdier har vokst.</strong> Oslo Børs hovedindeks (OSEBX) har gått fra ca. 350 (2005) til over 1 700 (2024) — nesten en femdobling. Aksjeporteføljer har derfor blitt mye mer verdt, og blir beskattet på en høyere nominell verdi.</p>
+    <p><strong>2. Boligpriser har vokst sterkt.</strong> SSBs boligprisindeks viser at priser i Oslo er opp ca. 150 % siden 2005. Sekundærboliger (968 mrd. i bruttoformue 2024) har lavere skatterabatt og slår direkte ut i formuesskatten.</p>
+    <p><strong>3. Politiske endringer i regjeringene.</strong>
+    <strong>Stoltenberg II (2005–2013):</strong> Reduserte antall betalere fra 1,2 mill. til 615 000 ved å øke bunnfradraget — mens proveny økte pga. høyere verdsettelse.
+    <strong>Solberg I/II (2013–2021):</strong> Reduserte ytterligere antall betalere til 498 000, beholdt aksjerabatt på 65–75 %, men aksjeverdier vokste raskt.
+    <strong>Støre I (2021–):</strong> Skjerpet — sats fra 0,85 % til 1,1 % (på formue over 20 mill.), aksjerabatt fra 75 % til 80 %, ny "trinnskatt" på 0,4 % over 20 mill. Antall betalere opp 130 000 fra 2020.</p>
+    <p><strong>4. Utbytteskatten ble innført i 2006.</strong> Aksjonærmodellen ble innført med skattereformen 2006 — første gang utbytte ble beskattet hos personlig eier. Effektiv sats har deretter steget gradvis fra 28 % (2006) til 37,84 % (2024) — en økning på 35 %.</p>
+  </div>
+
+  <h4>2021-anomali — bedriftseiernes "skattetilpasning"</h4>
+
+  <div class="callout callout-info">
+    <p>Utbyttetallet for 2021 (146 mrd. kr) er nesten <strong>dobbelt så stort</strong> som året før (64 mrd.) og året etter (70 mrd.). Dette er et klart eksempel på <strong>strategisk skattetilpasning</strong>: Solberg-regjeringen varslet i Nasjonalbudsjettet 2022 at utbytteskatten ville stige fra 31,68 % til 35,2 %, og senere til 37,84 % under Støre-regjeringen. Bedriftseiere reagerte rasjonelt ved å ta ut store utbytter <em>før</em> satsen økte.</p>
+    <p>Dette belyser et grunnleggende problem med utbytteskatten: <strong>tidspunktet</strong> er fleksibelt for eierne, og dermed kan provenyet i et enkelt år bli misvisende. Civita-rapporten bruker dette poenget for å argumentere mot at utbytteskatt er en pålitelig fordelingsmekanisme — bedriftseiere kan velge når (og om) de tar ut utbytte. LO og venstresiden ser på det samme tallet som bevis på at de rikeste systematisk tilpasser seg for å minimere skatt.</p>
+    <p>Begge sider har et poeng. Men for analytiske formål: når man sammenligner utbyttenivå mellom år, må 2021 behandles som et utliggertilfelle.</p>
+  </div>
+
+  <h3>Hvilke næringer og selskapsformer er mest påvirket?</h3>
+
+  <p>Eierbeskatningen treffer norske bedrifter ulikt. Tre dimensjoner driver dette: <strong>(1) selskapsform</strong> (AS vs. ENK vs. holding), <strong>(2) eierstruktur</strong> (norsk privat vs. utenlandsk vs. statlig), og <strong>(3) verdsettelse</strong> (børsnotert vs. unotert kapital). SSB-data fra tre tabeller belyser dette skarpt.</p>
+
+  <h4>1. Selskapsformer — fundamentalt forskjellig beskatning</h4>
+
+  <table class="data" style="font-size: 12px;">
+    <thead>
+      <tr>
+        <th>Selskapsform</th>
+        <th>Selskapsskatt</th>
+        <th>Utbytteskatt</th>
+        <th>Formuesskatt</th>
+        <th>Total eier-skatt</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>AS (aksjeselskap)</strong></td>
+        <td class="num">22 % på overskudd</td>
+        <td class="num">37,84 % ved utbytte</td>
+        <td class="num">På aksjeverdi (20 % rabatt)</td>
+        <td class="num">~52 % på utdelt</td>
+      </tr>
+      <tr>
+        <td><strong>ENK (enkeltpersonforetak)</strong></td>
+        <td class="num">N/A</td>
+        <td class="num">N/A</td>
+        <td class="num">På driftsmidler (10 % rabatt)</td>
+        <td class="num">Inntil 47,4 % personskatt</td>
+      </tr>
+      <tr>
+        <td><strong>DA / ANS (deltakerlignet)</strong></td>
+        <td class="num">N/A</td>
+        <td class="num">N/A</td>
+        <td class="num">På deltakerandel</td>
+        <td class="num">Personlig løpende</td>
+      </tr>
+      <tr>
+        <td><strong>Holdingsstruktur (AS over AS)</strong></td>
+        <td class="num">22 % på underliggende</td>
+        <td class="num">Fritaksmetoden ved AS-AS</td>
+        <td class="num">Verdsettelse av holding</td>
+        <td class="num">Utsettes til personlig uttak</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>I praksis dominerer <strong>aksjeselskaper</strong> (AS) totalt. Det er ca. 365 000 aktive AS i Norge mot ca. 280 000 ENK. Holdingsstrukturer er mest brukt blant store og mellomstore bedrifter — Civita anslår at ca. 80 % av norske bedrifter med over 50 mill. i verdier er organisert med holdingselskap. Holdingsstrukturen fungerer som en «utsettelsesventil»: så lenge eieren ikke tar ut utbytte personlig, akkumulerer kapitalen i holdingselskapet uten utbytteskatt. Civita anslår at <strong>3 100 mrd. kr</strong> i opparbeidet kapital ligger i private holdingselskaper i Norge — et tall som er sentralt i debatten om «skattehull» (Klassekampen) versus «investert kapital» (Civita).</p>
+
+  <h4>2. Næringsfordeling — selskaper i formuesskatteposisjon (2024)</h4>
+
+  <p>SSB tabell 14440 viser hvilke næringer som har flest selskaper hvor formuesskatten beregnes <em>på selskapsnivå</em> (et mindre, men avslørende utvalg på ca. 2 000 selskaper). Dette er en delvis indikator — den fulle effekten kommer via personlige eieres formuesskatt på aksjer, som ikke fanges opp i tabell 14440. Likevel viser fordelingen et tydelig mønster:</p>
+
+  <div class="dist-bar">
+    <div class="dist-bar-row">
+      <span class="dist-bar-label">Eiendom (L)</span>
+      <div class="dist-bar-track"><div class="dist-bar-fill" style="width: 100%;"></div></div>
+      <span class="dist-bar-value">535 (26,8 %)</span>
+    </div>
+    <div class="dist-bar-row">
+      <span class="dist-bar-label">Jordbruk, skogbruk, fiske (A)</span>
+      <div class="dist-bar-track"><div class="dist-bar-fill" style="width: 60.9%;"></div></div>
+      <span class="dist-bar-value">326 (16,3 %)</span>
+    </div>
+    <div class="dist-bar-row">
+      <span class="dist-bar-label">Varehandel (G)</span>
+      <div class="dist-bar-track"><div class="dist-bar-fill" style="width: 38.5%;"></div></div>
+      <span class="dist-bar-value">206 (10,3 %)</span>
+    </div>
+    <div class="dist-bar-row">
+      <span class="dist-bar-label">Kultur og fritid (R)</span>
+      <div class="dist-bar-track"><div class="dist-bar-fill" style="width: 35.3%;"></div></div>
+      <span class="dist-bar-value">189 (9,5 %)</span>
+    </div>
+    <div class="dist-bar-row">
+      <span class="dist-bar-label">Finans og forsikring (K)</span>
+      <div class="dist-bar-track"><div class="dist-bar-fill" style="width: 32%;"></div></div>
+      <span class="dist-bar-value">171 (8,6 %)</span>
+    </div>
+    <div class="dist-bar-row">
+      <span class="dist-bar-label">Faglig/vitenskapelig tj. (M)</span>
+      <div class="dist-bar-track"><div class="dist-bar-fill" style="width: 25.4%;"></div></div>
+      <span class="dist-bar-value">136 (6,8 %)</span>
+    </div>
+    <div class="dist-bar-row">
+      <span class="dist-bar-label">Forretningsmessig tj. (N)</span>
+      <div class="dist-bar-track"><div class="dist-bar-fill" style="width: 22.4%;"></div></div>
+      <span class="dist-bar-value">120 (6,0 %)</span>
+    </div>
+    <div class="dist-bar-row">
+      <span class="dist-bar-label">Bygg og anlegg (F)</span>
+      <div class="dist-bar-track"><div class="dist-bar-fill" style="width: 12.9%;"></div></div>
+      <span class="dist-bar-value">69 (3,5 %)</span>
+    </div>
+    <div class="dist-bar-row">
+      <span class="dist-bar-label">Industri (C)</span>
+      <div class="dist-bar-track"><div class="dist-bar-fill purple" style="width: 7.9%;"></div></div>
+      <span class="dist-bar-value">42 (2,1 %)</span>
+    </div>
+    <div class="dist-bar-row">
+      <span class="dist-bar-label">Bergverk + olje/gass (B)</span>
+      <div class="dist-bar-track"><div class="dist-bar-fill purple" style="width: 0.4%;"></div></div>
+      <span class="dist-bar-value">2 (0,1 %)</span>
+    </div>
+  </div>
+
+  <p style="font-size: 12px; color: var(--text-3);">Antall selskaper i formuesskatteposisjon per næring 2024. Kilde: SSB tabell 14440. Prosentangivelse er andel av total formuesskatteposisjon-utvalget på 1 996 selskaper.</p>
+
+  <div class="callout callout-info">
+    <p><strong>Eiendom på topp.</strong> 535 eiendomsselskaper — over halvparten flere enn nummer to (jordbruk). Dette skyldes at eiendom har høy verdsettelse og typisk personlig norsk eierskap (Olav Thon-konsernet, familiestiftelser med eiendomsporteføljer, mindre eiendomsutviklere). Næringseiendom har høyere skatterabatt enn primærbolig (rabatt på 20-25 %), men markedsverdiene er så høye at det utgjør betydelig formuesskatt.</p>
+    <p><strong>Petroleum nesten fraværende.</strong> Bare 2 av 1 420 selskaper i bergverk/olje/gass er i formuesskatteposisjon. Forklaringen er enkel: petroleumsnæringen domineres av utenlandsk eierskap (ExxonMobil, Shell, TotalEnergies) og statlig eierskap (Equinor 67 % statlig, Petoro 100 %). Disse betaler ingen norsk formuesskatt. Resultat: formuesskatten når <em>ikke</em> der de største skatteinntektene kommer fra (382 mrd. i petroleumsskatt).</p>
+    <p><strong>Industri også lite påvirket.</strong> Bare 42 industriselskap (av 14 690) i formuesskatteposisjon — fordi mye norsk industri er enten børsnotert med spredte eiere, utenlandsk eid (Hydro 34 % utenlandsk, Yara 41 %), eller statlig medeid (Hydro 34 % stat, Yara 36 % stat).</p>
+  </div>
+
+  <h4>3. Eierstruktur på Oslo Børs — hvor lite av børsen eies av nordmenn personlig?</h4>
+
+  <p>SSB tabell 09445 (Verdipapirsentralen) viser eierfordelingen for noterte aksjer på Oslo Børs ved utgangen av 2025:</p>
+
+  <div class="dist-bar">
+    <div class="dist-bar-row">
+      <span class="dist-bar-label">Utlandet</span>
+      <div class="dist-bar-track"><div class="dist-bar-fill warning" style="width: 100%;"></div></div>
+      <span class="dist-bar-value">1 586 mrd. (39,9 %)</span>
+    </div>
+    <div class="dist-bar-row">
+      <span class="dist-bar-label">Offentlig forvaltning (stat + SPN)</span>
+      <div class="dist-bar-track"><div class="dist-bar-fill purple" style="width: 67.5%;"></div></div>
+      <span class="dist-bar-value">1 071 mrd. (26,9 %)</span>
+    </div>
+    <div class="dist-bar-row">
+      <span class="dist-bar-label">Norske finansforetak</span>
+      <div class="dist-bar-track"><div class="dist-bar-fill" style="width: 35.3%;"></div></div>
+      <span class="dist-bar-value">560 mrd. (14,1 %)</span>
+    </div>
+    <div class="dist-bar-row">
+      <span class="dist-bar-label">Norske ikke-finansielle foretak</span>
+      <div class="dist-bar-track"><div class="dist-bar-fill" style="width: 35.2%;"></div></div>
+      <span class="dist-bar-value">558 mrd. (14,0 %)</span>
+    </div>
+    <div class="dist-bar-row">
+      <span class="dist-bar-label"><strong>Husholdninger (private personer)</strong></span>
+      <div class="dist-bar-track"><div class="dist-bar-fill success" style="width: 12.7%;"></div></div>
+      <span class="dist-bar-value">201 mrd. (5,0 %)</span>
+    </div>
+  </div>
+
+  <p style="font-size: 12px; color: var(--text-3);">Markedsverdi noterte aksjer per eiersektor, Oslo Børs 2025K4. Kilde: SSB tabell 09445.</p>
+
+  <div class="callout callout-success">
+    <p><strong>Bare 5 % av Oslo Børs eies direkte av norske husholdninger.</strong> Av 3 975 mrd. kr i markedsverdi på Oslo Børs er kun ca. 200 mrd. eid av personlige norske aksjonærer som potensielt betaler formuesskatt direkte på aksjene. Resten eies av:</p>
+    <p><strong>Utlandet (40 %)</strong> — utenlandske investorer og pensjonsfond. Disse betaler <em>ikke</em> norsk formuesskatt på sine aksjer.</p>
+    <p><strong>Offentlig forvaltning (27 %)</strong> — først og fremst Folketrygdfondet (SPN, 416 mrd.) og statens direkte aksjeposter (Equinor, Telenor, DNB, Hydro). Staten betaler ikke skatt til seg selv.</p>
+    <p><strong>Norske foretak (28 %)</strong> — selskaper som eier andre selskaper. Mellom selskaper er utbytte normalt skattefritt (fritaksmetoden), og holdingselskaper betaler ikke formuesskatt.</p>
+    <p>Dette betyr at <strong>formuesskattens treffsikkerhet på børsen er begrenset</strong>. Store norske bedrifter som Equinor, DNB, Telenor og Hydro har eierstruktur (utlandet + stat) som unngår norsk formuesskatt på selve aksjene. Formuesskatten treffer derimot tungt i <em>unoterte</em> aksjer, der personlig norsk eierskap er typisk.</p>
+  </div>
+
+  <h4>4. Den fulle bildet — hvor formuesskatten egentlig treffer</h4>
+
+  <p>Tar vi med tabell 08815 (formuens komponenter) sammen med tabell 09445 (eierfordeling Oslo Børs), får vi følgende oppsummering:</p>
+
+  <table class="data" style="font-size: 12px;">
+    <thead>
+      <tr>
+        <th>Type kapital</th>
+        <th class="num">Verdi (mrd.)</th>
+        <th>Eierstruktur</th>
+        <th>Formuesskatt-effekt</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Børsnoterte aksjer (Oslo Børs)</td>
+        <td class="num">3 975</td>
+        <td>40 % utland, 27 % stat, 5 % personlig</td>
+        <td>LITEN — kun 5 % rammes direkte</td>
+      </tr>
+      <tr>
+        <td>Unoterte aksjer (typisk norsk AS)</td>
+        <td class="num">~1 700</td>
+        <td>Hovedsakelig norske personer/holdingselskap</td>
+        <td><strong>STOR</strong> — hovedmål for skatten</td>
+      </tr>
+      <tr>
+        <td>Næringseiendom (i AS)</td>
+        <td class="num">~1 000</td>
+        <td>Norsk personlig + holdingstrukturer</td>
+        <td><strong>STOR</strong> — verdistigning gir formuesskatt</td>
+      </tr>
+      <tr>
+        <td>Driftsløsøre/næringsmidler (ENK)</td>
+        <td class="num">62</td>
+        <td>Personlig næringsdrivende</td>
+        <td>MIDDELS — påvirker små bedrifter direkte</td>
+      </tr>
+      <tr>
+        <td>Sekundærbolig (privat utleie)</td>
+        <td class="num">968</td>
+        <td>Norske husholdninger</td>
+        <td><strong>STOR</strong> — kun 5 % rabatt</td>
+      </tr>
+      <tr>
+        <td>Primærbolig</td>
+        <td class="num">2 186</td>
+        <td>Norske husholdninger</td>
+        <td>LITEN — 75 % rabatt opp til 10 mill.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p style="font-size: 11px; color: var(--text-3);">Estimater. Unoterte aksjer-tallet er en triangulering: SSB tabell 08815 viser ca. 1 900 mrd. i «verdipapirer» (VPS+ikke-VPS). Av dette er ca. 200 mrd. noterte aksjer (Oslo Børs eid av husholdninger). Resten er en miks av unoterte aksjer, fond og verdipapirer. Næringseiendom-tallet er stort sett dekket av sekundærbolig og «annen fast eiendom».</p>
+
+  <div class="callout callout-info">
+    <p><strong>Oppsummering — hvor formuesskatten egentlig treffer:</strong> Formuesskatten har sterkest effekt på <strong>unoterte aksjer</strong> i norske bedrifter eid av personlige nordmenn (typisk gründere og familiebedrifter), <strong>næringseiendom</strong> i AS-form, og <strong>sekundærboliger</strong>. Den treffer minimalt på børsnoterte storselskaper (lav personlig eierandel), petroleumsnæringen (utenlandsk/statlig eierskap), og industri (også høy utenlandsk andel).</p>
+    <p><strong>Det betyr at debatten egentlig handler om gründere og familiebedrifter</strong> — ikke om "de superrike" som politikerne ofte refererer til. De fleste milliardærene har sin formue i unoterte aksjeposisjoner i selskaper de selv har bygget opp (Witzøe i Salmar, Røkke i Aker, Hagen i Reitan/Orkla-systemet). Når Civita argumenterer for at formuesskatten er en bedriftsskatt, er det denne mekanismen de peker på.</p>
+    <p><strong>Næringer som treffes hardest:</strong> Eiendom, jordbruk/fiske, kultur/fritid, varehandel og finans — alle med høy andel norsk personlig eierskap. <strong>Næringer som treffes minst:</strong> Petroleum, industri og store deler av eksportindustrien — dominert av utenlandske og statlige eiere.</p>
+  </div>
+
+  <h3>Scenario: Tilbake til 2020-nivå — hva ville det koste?</h3>
+
+  <p>Eierbeskatningen er kraftig skjerpet under Støre-regjeringen (2021–). Civita og Høyre argumenterer for å reversere til 2020-nivå (siste år før skjerpelsene). Hva ville det koste i tapte skatteinntekter? Statisk beregning på 2024-grunnlag, før atferdseffekter:</p>
+
+  <h4>Regelendringer 2020 → 2024 — det som må reverseres</h4>
+
+  <table class="data" style="font-size: 12px;">
+    <thead>
+      <tr>
+        <th>Parameter</th>
+        <th class="num">2020</th>
+        <th class="num">2024</th>
+        <th>Endring</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Formuesskatt</strong></td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td>Bunnfradrag (single)</td>
+        <td class="num">1,5 mill. kr</td>
+        <td class="num">1,76 mill. kr</td>
+        <td>+17 % (motvirkende)</td>
+      </tr>
+      <tr>
+        <td>Sats opp til 20 mill</td>
+        <td class="num">0,85 %</td>
+        <td class="num">1,00 %</td>
+        <td>+18 %</td>
+      </tr>
+      <tr>
+        <td>Sats over 20 mill (toppsats)</td>
+        <td class="num">0,85 %</td>
+        <td class="num">1,10 %</td>
+        <td>+29 %</td>
+      </tr>
+      <tr>
+        <td>Aksjerabatt</td>
+        <td class="num">35 %</td>
+        <td class="num">20 %</td>
+        <td>Skatt på 23 % mer av aksjeverdi</td>
+      </tr>
+      <tr>
+        <td>Sekundærbolig-rabatt</td>
+        <td class="num">10 %</td>
+        <td class="num">5 %</td>
+        <td>Skatt på 5,3 % mer</td>
+      </tr>
+      <tr>
+        <td><strong>Utbytteskatt</strong></td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td>Skattesats kapital</td>
+        <td class="num">22 %</td>
+        <td class="num">22 %</td>
+        <td>Uendret</td>
+      </tr>
+      <tr>
+        <td>Oppjusteringsfaktor utbytte</td>
+        <td class="num">1,44</td>
+        <td class="num">1,72</td>
+        <td>+19 %</td>
+      </tr>
+      <tr>
+        <td><strong>Effektiv utbytteskatt</strong></td>
+        <td class="num"><strong>31,68 %</strong></td>
+        <td class="num"><strong>37,84 %</strong></td>
+        <td><strong>+19 %</strong></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p style="font-size: 12px; color: var(--text-3);">Solberg-regjeringen økte oppjusteringsfaktoren til 1,60 (35,2 %) i 2022. Støre-regjeringen videreførte til 1,72 (37,84 %) i 2023. Selve kapitalsatsen på 22 % er uendret — det er oppjusteringsfaktoren som har drevet utbytteskatten opp.</p>
+
+  <h4>Provenyeffekt — formuesskatten</h4>
+
+  <div class="explain">
+    <p>Beregning per komponent på 2024-grunnlag:</p>
+  </div>
+
+  <table class="data">
+    <thead>
+      <tr>
+        <th>Endring</th>
+        <th class="num">Effekt på proveny</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Sats redusert fra 1,05 % snitt til 0,85 %</td>
+        <td class="num">−19 % på all formue</td>
+      </tr>
+      <tr>
+        <td>Aksjerabatt 35 % (vs 20 %)</td>
+        <td class="num">−3,5 % på total proveny</td>
+      </tr>
+      <tr>
+        <td>Sekundærbolig-rabatt 10 % (vs 5 %)</td>
+        <td class="num">−0,6 % på total proveny</td>
+      </tr>
+      <tr>
+        <td>Bunnfradrag 1,5 mill (vs 1,76 mill)</td>
+        <td class="num">+1 % på total proveny</td>
+      </tr>
+      <tr class="total">
+        <td>Kombinert (multiplikativ) effekt</td>
+        <td class="num">≈ −21 %</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>Faktisk 2024-proveny: <strong>31,1 mrd. kr.</strong> Beregnet proveny med 2020-regelverk på 2024-grunnlag: <strong>~24,5 mrd. kr.</strong> Reduksjon: <strong>~6,6 mrd. kr</strong>.</p>
+
+  <p style="font-size: 12px; color: var(--text-3);">Forskjellen mellom 24,5 mrd. (estimert) og faktisk 2020-proveny på 16,9 mrd. skyldes verdivekst i formue — Oslo Børs er opp ca. 50 % siden 2020, og boligpriser har også vokst betydelig. Man kan ikke "rulle tilbake" verdivekst, kun regelverket.</p>
+
+  <h4>Provenyeffekt — utbytteskatten</h4>
+
+  <table class="data">
+    <thead>
+      <tr>
+        <th>Beregning</th>
+        <th class="num">Verdi</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Skattepliktig utbytte 2024</td>
+        <td class="num">81,6 mrd. kr</td>
+      </tr>
+      <tr>
+        <td>Sats 2024 (37,84 %) → proveny</td>
+        <td class="num">30,9 mrd. kr</td>
+      </tr>
+      <tr>
+        <td>Sats 2020 (31,68 %) → proveny</td>
+        <td class="num">25,9 mrd. kr</td>
+      </tr>
+      <tr class="total">
+        <td>STATISK reduksjon</td>
+        <td class="num">−5,0 mrd. kr</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>Atferdsjustert: Civita-økonomer anslår at lavere utbytteskatt gir høyere uttak (elastisitet 0,3–0,5). Hvis utbyttegrunnlaget vokser 10 % pga. lavere sats, blir proveny <strong>~28,4 mrd</strong> i stedet for 25,9 mrd. — atferdsjustert reduksjon kan da ende på ca. <strong>−2,5 mrd. kr</strong> i stedet for −5,0 mrd. Dette er Civita-argumentet for at "skatten på utbytte ofte er selvskadende": staten taper mindre enn statisk beregning antyder, fordi grunnlaget vokser.</p>
+
+  <h4>Samlet effekt — eierbeskatning til 2020-nivå</h4>
+
+  <table class="data">
+    <thead>
+      <tr>
+        <th>Skatt</th>
+        <th class="num">Faktisk 2024</th>
+        <th class="num">2020-regelverk</th>
+        <th class="num">Endring (statisk)</th>
+        <th class="num">Endring (atferdsjustert)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Formuesskatt</td>
+        <td class="num">31,1 mrd.</td>
+        <td class="num">24,5 mrd.</td>
+        <td class="num">−6,6 mrd.</td>
+        <td class="num">−5 til −7 mrd.</td>
+      </tr>
+      <tr>
+        <td>Utbytteskatt</td>
+        <td class="num">30,9 mrd.</td>
+        <td class="num">25,9 mrd.</td>
+        <td class="num">−5,0 mrd.</td>
+        <td class="num">−2,5 til −5 mrd.</td>
+      </tr>
+      <tr class="total">
+        <td>Sum eierbeskatning</td>
+        <td class="num">62,0 mrd.</td>
+        <td class="num">50,3 mrd.</td>
+        <td class="num">−11,7 mrd.</td>
+        <td class="num">−7,5 til −12 mrd.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout callout-info">
+    <p><strong>Statisk provenytap: ca. 11,7 mrd. kr/år.</strong> Det er:</p>
+    <p>• 0,36 % av offentlig forvaltnings totale inntekter (3 218 mrd.) — marginalt</p>
+    <p>• 11 % av selskapsskatt fastland (110 mrd.) — betydelig</p>
+    <p>• 2,5 % av personlig inntektsskatt (~470 mrd.) — moderat</p>
+    <p>• Ca. <strong>halvparten</strong> av forsvarsbudsjettet (~21 mrd. økning fra 2024 til 2026)</p>
+  </div>
+
+  <h4>Atferdseffekter — hva sier forskningen?</h4>
+
+  <p>Statisk beregning på 11,7 mrd. tap er bare første tilnærming. Atferdseffekter kan endre tallet betydelig — men eksperter er uenige om størrelsen. Her er fire dokumenterte mekanismer, med tilhørende kilde:</p>
+
+  <div class="callout callout-success">
+    <p><strong>1. Utbytte-elastisitet (Civita anslår 0,3–0,5).</strong> Lavere utbytteskatt gjør det mer attraktivt å ta ut utbytte personlig. Sterkeste empiriske bevis: 2021-utbyttet på 146 mrd. kr (mot 64 mrd. året før) — bedriftseiere tok ut store utbytter <em>før</em> Solberg/Støre-regjeringens varslede satsøkninger. Hvis utbyttegrunnlaget vokser 10 % ved retur til 31,68 % sats: gjeninnvinning av <strong>2,5 mrd. kr</strong>.</p>
+  </div>
+
+  <div class="callout callout-success">
+    <p><strong>2. Økt investering i norske bedrifter (Civita/NyAnalyse/BI).</strong> Norske bedrifter med eier i formuesskatteposisjon tar ut nesten <em>dobbelt så mye utbytte</em> som tilsvarende utenlandskeide bedrifter — fordi eierne trenger pengene for å betale formuesskatt. Civita argumenterer for at reversering vil redusere "kapital-tapping" fra bedrifter, øke investeringer og gi 0,5–1,0 mrd. i økt selskapsskatt på sikt. NHH-økonomer er skeptiske: dette krever sterk antakelse om at investert kapital faktisk gir høyere produktivitet enn alternativ anvendelse.</p>
+  </div>
+
+  <div class="callout callout-info">
+    <p><strong>3. Utflyttingseffekt — to motstridende perspektiver:</strong></p>
+    <p><strong>Civita/Høyre:</strong> Siden 2021 har 25–50 rike personer flyttet til Sveits, bl.a. Kjell Inge Røkke (Lugano 2022) og Øystein Moan (Zug 2024). Civita knytter dette direkte til Støre-regjeringens skjerpelse, og hevder reversering vil bremse utflyttingen — langsiktig provenyeffekt: 1–3 mrd. kr/år.</p>
+    <p><strong>NHH (Ole-Andreas Elvik Næss):</strong> Empirisk analyse viser at årlig formuesskatt-tap fra utflyttere er <strong>kun 0,77 mrd. kr</strong>. Utflytterne hadde en "monsterrabatt" på ~70 % av reell formue (verdsettelsesregler), så de bidro lite til formuesskatten uansett. Hovedmotivasjon var "5-årsregelen" (skattehull som lot dem unngå utsatt inntektsskatt på 142 mrd.) — ikke formuesskatten i seg selv. Skattehullet ble tettet i nov. 2022, så utflyttingen vil bremses uansett politiske endringer.</p>
+  </div>
+
+  <div class="callout callout-info">
+    <p><strong>4. Sysselsettingseffekt (Frischsenteret 2020 — kontroversiell).</strong> Forskere ved Frischsenteret fant overraskende at <em>økt</em> formuesskatt kan øke sysselsettingen i små og mellomstore bedrifter, fordi humankapital ikke regnes med i formuesgrunnlaget — eiere ansetter mer for å redusere skattbar formue. Civita tolker dette som ineffektivt (kapital bindes i lavproduktive arbeidsplasser), mens venstresiden ser det som et argument for å beholde formuesskatten. Effekten av reversering er teoretisk usikker — kan være −0,5 til −2 mrd. i lavere skatteinntekt fra mindre sysselsetting.</p>
+  </div>
+
+  <h4>Tre scenarier for samlet provenyeffekt — visuell sammenligning</h4>
+
+  <p>Stolpediagrammet under viser hvordan det statiske provenytapet på 11,7 mrd. kr endres når ulike atferdseffekter legges til. Fra venstre: ren statisk beregning, NHH-tolkning (moderate effekter), Civita lavt anslag, og Civita høyt anslag (full dynamisk effekt over 5–10 år).</p>
+
+  <div class="chart-card">
+    <svg viewBox="0 0 720 380" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Stolpediagram av provenytap under ulike atferdseffekt-scenarier">
+      <!-- Y-akse-grid -->
+      <line x1="80" y1="30" x2="700" y2="30" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="2,2"/>
+      <line x1="80" y1="70" x2="700" y2="70" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="2,2"/>
+      <line x1="80" y1="110" x2="700" y2="110" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="2,2"/>
+      <line x1="80" y1="150" x2="700" y2="150" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="2,2"/>
+      <line x1="80" y1="190" x2="700" y2="190" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="2,2"/>
+      <line x1="80" y1="230" x2="700" y2="230" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="2,2"/>
+      <line x1="80" y1="270" x2="700" y2="270" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="2,2"/>
+
+      <!-- Y-akse-labels (negative verdier) -->
+      <text x="70" y="34" text-anchor="end" font-size="10" fill="var(--text-3)">0</text>
+      <text x="70" y="74" text-anchor="end" font-size="10" fill="var(--text-3)">−2</text>
+      <text x="70" y="114" text-anchor="end" font-size="10" fill="var(--text-3)">−4</text>
+      <text x="70" y="154" text-anchor="end" font-size="10" fill="var(--text-3)">−6</text>
+      <text x="70" y="194" text-anchor="end" font-size="10" fill="var(--text-3)">−8</text>
+      <text x="70" y="234" text-anchor="end" font-size="10" fill="var(--text-3)">−10</text>
+      <text x="70" y="274" text-anchor="end" font-size="10" fill="var(--text-3)">−12</text>
+      <text x="40" y="155" text-anchor="middle" font-size="11" fill="var(--text-2)" transform="rotate(-90 40 155)">Mrd. kr/år</text>
+
+      <!-- 0-linje (sterkere) -->
+      <line x1="80" y1="30" x2="700" y2="30" stroke="var(--text-3)" stroke-width="1"/>
+
+      <!-- STOLPE 1: Statisk -11,7 mrd -->
+      <rect x="115" y="30" width="80" height="234" fill="#D85A30" opacity="0.85"/>
+      <text x="155" y="22" text-anchor="middle" font-size="13" font-weight="bold" fill="#D85A30">−11,7</text>
+      <text x="155" y="285" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--text)">STATISK</text>
+      <text x="155" y="300" text-anchor="middle" font-size="10" fill="var(--text-3)">Ingen atferd</text>
+
+      <!-- STOLPE 2: NHH-tolkning -9,7 mrd (rød 9,7 + grønn 2,0) -->
+      <rect x="265" y="30" width="80" height="194" fill="#D85A30" opacity="0.85"/>
+      <rect x="265" y="224" width="80" height="40" fill="#0F6E56" opacity="0.85"/>
+      <text x="305" y="22" text-anchor="middle" font-size="13" font-weight="bold" fill="var(--text)">−9,7</text>
+      <text x="305" y="225" text-anchor="middle" font-size="9" fill="white" font-weight="bold">+2,0</text>
+      <text x="305" y="285" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--text)">NHH</text>
+      <text x="305" y="300" text-anchor="middle" font-size="10" fill="var(--text-3)">Moderate effekter</text>
+
+      <!-- STOLPE 3: Civita lavt -8,6 mrd (rød 8,6 + grønn 3,1) -->
+      <rect x="415" y="30" width="80" height="172" fill="#D85A30" opacity="0.85"/>
+      <rect x="415" y="202" width="80" height="62" fill="#0F6E56" opacity="0.85"/>
+      <text x="455" y="22" text-anchor="middle" font-size="13" font-weight="bold" fill="var(--text)">−8,6</text>
+      <text x="455" y="237" text-anchor="middle" font-size="9" fill="white" font-weight="bold">+3,1</text>
+      <text x="455" y="285" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--text)">CIVITA (lav)</text>
+      <text x="455" y="300" text-anchor="middle" font-size="10" fill="var(--text-3)">Forsiktig dynamisk</text>
+
+      <!-- STOLPE 4: Civita høyt -5,7 mrd (rød 5,7 + grønn 6,0) -->
+      <rect x="565" y="30" width="80" height="114" fill="#D85A30" opacity="0.85"/>
+      <rect x="565" y="144" width="80" height="120" fill="#0F6E56" opacity="0.85"/>
+      <text x="605" y="22" text-anchor="middle" font-size="13" font-weight="bold" fill="var(--text)">−5,7</text>
+      <text x="605" y="208" text-anchor="middle" font-size="9" fill="white" font-weight="bold">+6,0</text>
+      <text x="605" y="285" text-anchor="middle" font-size="11" font-weight="bold" fill="var(--text)">CIVITA (høy)</text>
+      <text x="605" y="300" text-anchor="middle" font-size="10" fill="var(--text-3)">Full dynamisk</text>
+
+      <!-- Forklaring -->
+      <rect x="120" y="325" width="14" height="14" fill="#D85A30" opacity="0.85"/>
+      <text x="142" y="336" font-size="11" fill="var(--text-2)">Netto provenytap</text>
+      <rect x="280" y="325" width="14" height="14" fill="#0F6E56" opacity="0.85"/>
+      <text x="302" y="336" font-size="11" fill="var(--text-2)">Gjeninnvinning fra atferd</text>
+      
+      <!-- Tittel-linje -->
+      <text x="400" y="365" text-anchor="middle" font-size="10" fill="var(--text-3)" font-style="italic">
+        Provenyeffekt av reversering til 2020-nivå (mrd. kr/år) under ulike forutsetninger om atferdseffekter
+      </text>
+    </svg>
+  </div>
+
+  <h4>Hvilke effekter inngår i hvert scenario?</h4>
+
+  <table class="data" style="font-size: 12px;">
+    <thead>
+      <tr>
+        <th>Effekt</th>
+        <th class="num">Statisk</th>
+        <th class="num">NHH</th>
+        <th class="num">Civita (lav)</th>
+        <th class="num">Civita (høy)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Direkte formuesskatt-tap</td>
+        <td class="num">−6,6</td>
+        <td class="num">−6,6</td>
+        <td class="num">−6,6</td>
+        <td class="num">−6,6</td>
+      </tr>
+      <tr>
+        <td>Direkte utbytteskatt-tap</td>
+        <td class="num">−5,0</td>
+        <td class="num">−5,0</td>
+        <td class="num">−5,0</td>
+        <td class="num">−5,0</td>
+      </tr>
+      <tr>
+        <td>+ Utbytte-elastisitet (mer uttak)</td>
+        <td class="num">0</td>
+        <td class="num">+1,5</td>
+        <td class="num">+2,5</td>
+        <td class="num">+2,5</td>
+      </tr>
+      <tr>
+        <td>+ Økt selskapsskatt fra investering</td>
+        <td class="num">0</td>
+        <td class="num">+0,2</td>
+        <td class="num">+0,5</td>
+        <td class="num">+1,0</td>
+      </tr>
+      <tr>
+        <td>+ Bremset utflytting (langsiktig)</td>
+        <td class="num">0</td>
+        <td class="num">+0,2</td>
+        <td class="num">+0,1</td>
+        <td class="num">+2,5</td>
+      </tr>
+      <tr class="total">
+        <td>NETTO ÅRLIG PROVENYTAP</td>
+        <td class="num"><strong>−11,7</strong></td>
+        <td class="num"><strong>−9,7</strong></td>
+        <td class="num"><strong>−8,6</strong></td>
+        <td class="num"><strong>−5,7</strong></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p style="font-size: 11px; color: var(--text-3);">Alle tall i mrd. kr/år. Civita "høy"-scenario antar full dynamisk effekt over 5–10 år, inklusive at utflyttingseffekten blir reversert (utflyttere returnerer). NHH-scenarioet bygger på Næss' empiriske analyse som viser begrensede atferdseffekter.</p>
+
+  <h4>Realistisk usikkerhetsintervall</h4>
+
+  <div class="callout callout-info">
+    <p><strong>Realistisk anslag for årlig provenytap: 8–11 mrd. kr.</strong> NHH-tolkningen (−9,7 mrd.) er sannsynligvis nærmere virkeligheten enn Civitas høye anslag, fordi:</p>
+    <p>• <strong>Utflyttingseffekten er sannsynligvis liten.</strong> NHH-Næss' empiriske analyse viser at årlig formuesskatt-tap fra utflyttere er kun 0,77 mrd. — selv ved full reversering ville besparelsen vært i den størrelsesorden, ikke flere milliarder.</p>
+    <p>• <strong>Investeringseffekten krever spesielle antakelser.</strong> Civitas argumentasjon om at "norske eiere må ta ut utbytte for å betale formuesskatt" er logisk — men det er empirisk uklart hvor stor del av disse utbyttene som ellers ville blitt reinvestert i Norge (vs. konsumert privat eller investert i utlandet).</p>
+    <p>• <strong>Utbytte-elastisiteten er den best dokumenterte effekten.</strong> 2021-anomalien (146 mrd. utbytte) viser at bedriftseiere reagerer raskt på satsendringer. 1,5–2,5 mrd. gjeninnvinning er sannsynlig.</p>
+    <p><strong>Politisk implikasjon:</strong> Reformen koster sannsynligvis 8–11 mrd. kr/år — ikke 5,7 mrd. som Civitas mest optimistiske anslag tilsier, og ikke 11,7 mrd. som ren statisk beregning gir. Det er <em>ikke</em> en ubetydelig reform i kroner og øre, men heller ikke en katastrofal en. Til sammenligning: 8–11 mrd. tilsvarer ca. 0,3 % av offentlig forvaltnings inntekter — eller ca. halvparten av forsvarsbudsjettets økning fra 2024 til 2026.</p>
+  </div>
+
+  <h4>Hvem tjener på en reversering?</h4>
+
+  <p>Et viktig spørsmål: Hvor er besparelsen konsentrert? Med utgangspunkt i fordelingen vi viste tidligere:</p>
+
+  <table class="data" style="font-size: 12px;">
+    <thead>
+      <tr>
+        <th>Gruppe</th>
+        <th class="num">Antall</th>
+        <th class="num">Besparelse formue</th>
+        <th class="num">Besparelse utbytte</th>
+        <th class="num">Total per person</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Topp formue (over 1 mill formuesskatt)</td>
+        <td class="num">2 838</td>
+        <td class="num">~1,9 mrd. (29 %)</td>
+        <td class="num">overlapper</td>
+        <td class="num">~670 000 kr</td>
+      </tr>
+      <tr>
+        <td>Topp utbytte (over 7,5 mill kr)</td>
+        <td class="num">1 594</td>
+        <td class="num">overlapper</td>
+        <td class="num">~1,7 mrd. (34 %)</td>
+        <td class="num">~1 mill. kr</td>
+      </tr>
+      <tr>
+        <td>Mellomgruppe (350K–1M form.skatt)</td>
+        <td class="num">7 193</td>
+        <td class="num">~700 mill.</td>
+        <td class="num">delvis overlapp</td>
+        <td class="num">~100 000 kr</td>
+      </tr>
+      <tr>
+        <td>Bredt: småbetalere (under 100K form.skatt)</td>
+        <td class="num">~671 000</td>
+        <td class="num">~3,9 mrd.</td>
+        <td class="num">~1,5 mrd.</td>
+        <td class="num">~5 000–10 000 kr</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p style="font-size: 12px; color: var(--text-3);">Estimert fordeling. De ulike gruppene overlapper: en person i toppen av formuesskatten har ofte også mottatt store utbytter. Tallene må derfor leses som indikative for hver dimensjon.</p>
+
+  <div class="perspective-grid">
+    <div class="perspective-card civita">
+      <p class="source-tag">Pro reversering</p>
+      <h4>Civita / Høyre / NHO</h4>
+      <p><strong>Korrekt brukt på små proveny — stor effekt på næringslivet.</strong> Reversering vil koste 7,5–12 mrd. kr — ca. 0,4 % av offentlige inntekter — men frigjøre kapital til investeringer og dempe utflyttingsproblemer. Norge er ett av få land med både formuesskatt og høy utbytteskatt; konkurranseulempen mot utenlandske eiere er strukturell.</p>
+      <p>Atferdseffekter gjør at den faktiske provenyreduksjonen blir mindre enn 11,7 mrd. — sannsynligvis 7,5–9 mrd. når man tar med økte utbytteinntekter og redusert utflytting.</p>
+    </div>
+    <div class="perspective-card lo">
+      <p class="source-tag">Mot reversering</p>
+      <h4>LO / Klassekampen / SV</h4>
+      <p><strong>Skattekutt for de aller rikeste.</strong> Av 11,7 mrd. i besparelse går ca. 35 % til de ~10 000 personene med høyest formuer og utbytter. Dette er ikke "stimulering av næringslivet" — det er omfordeling oppover. Pengene kunne brukt på velferd, helse eller utdanning.</p>
+      <p>Civita-argumentet om atferdseffekter er empirisk usikkert. Når utbytteskatten ble økt 2022–2023, falt utbyttene bare midlertidig — de er nå tilbake på normale nivåer.</p>
+    </div>
+  </div>
+
+  <h3>Sammenstilling med dashboardets hovedfunn</h3>
+
+  <p>Dashboardets hovedfunn er at <strong>30 petroleumsselskap</strong> betaler 382 mrd. kr i petroleumsskatt — mer enn 50 ganger så mye som alle 593 777 småbedrifter til sammen. Ser vi på <em>personlig eierbeskatning</em> (formue + utbytte) er bildet annerledes:</p>
+
+  <div class="callout callout-info">
+    <p><strong>Eierbeskatningen er konsentrert hos privatpersoner med næringskapital.</strong> De 2 838 personene som betaler over 1 mill. kr i formuesskatt, og de 1 594 personene som mottar over 7,5 mill. kr i utbytte, er i stor grad de samme personene — gründere, bedriftseiere og investorer i norske bedrifter. Disse betaler til sammen ca. 30+ mrd. kr i formues- og utbytteskatt direkte fra eierskap i norsk næringsliv.</p>
+    <p>Det betyr at <strong>norsk privat eierskap</strong> bidrar med 30+ mrd. kr i tillegg til selskapsskatten (110 mrd. kr fastland). Til sammenligning bidrar 593 777 småbedrifter samlet ca. 7 mrd. kr i selskapsskatt — og småbedriftseierne betaler i tillegg formuesskatt på sin del av næringskapitalen. Hovedbudskapet om «petroleum styrer det store bildet» står seg uansett, men eierbeskatningen viser at <em>noen tusen privatpersoner</em> bidrar med betydelige beløp gjennom det personlige skattesystemet.</p>
+  </div>
+
+  <h3>Kildedokumentasjon</h3>
+
+  <table class="data" style="font-size: 12px;">
+    <thead>
+      <tr>
+        <th>Påstand</th>
+        <th>Kilde</th>
+        <th>Verifikasjon</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>701 482 personer betaler formuesskatt 2024</td>
+        <td>SSB tabell 08231</td>
+        <td><span class="badge regnskap">SSB DIREKTE</span></td>
+      </tr>
+      <tr>
+        <td>Total formuesskatt 31,8 mrd. kr 2024</td>
+        <td>SSB tabell 08815</td>
+        <td><span class="badge regnskap">SSB DIREKTE</span></td>
+      </tr>
+      <tr>
+        <td>Bruttoformue-sammensetning</td>
+        <td>SSB tabell 08815</td>
+        <td><span class="badge regnskap">SSB DIREKTE</span></td>
+      </tr>
+      <tr>
+        <td>368 541 personer mottar faktisk utbytte 2024</td>
+        <td>SSB tabell 07758</td>
+        <td><span class="badge regnskap">SSB DIREKTE</span></td>
+      </tr>
+      <tr>
+        <td>85 mrd. kr i utbytte mottatt 2024</td>
+        <td>SSB tabell 07758</td>
+        <td><span class="badge regnskap">SSB DIREKTE</span></td>
+      </tr>
+      <tr>
+        <td>24 800 «potensielle nullskatteytere» 2022</td>
+        <td>SSB-analyse 2024 (Klassekampen 12.07.2024)</td>
+        <td><span class="badge regnskap">SSB DIREKTE</span></td>
+      </tr>
+      <tr>
+        <td>230 av disse hadde formue over 50 mill. kr</td>
+        <td>SSB-analyse 2024</td>
+        <td><span class="badge regnskap">SSB DIREKTE</span></td>
+      </tr>
+      <tr>
+        <td>16 400 var pensjonister med lav pensjon</td>
+        <td>SSB-analyse + Civita-notat jan 2025</td>
+        <td><span class="badge regnskap">2 KILDER</span></td>
+      </tr>
+      <tr>
+        <td>Norske eiere tar ut ~2× så mye utbytte som utenlandske</td>
+        <td>Civita/NyAnalyse/BI-rapport</td>
+        <td><span class="badge foreløpig">EN KILDE</span></td>
+      </tr>
+      <tr>
+        <td>Effektiv utbytteskatt 37,84 % (2024)</td>
+        <td>Skatteetaten</td>
+        <td><span class="badge regnskap">VERIFISERT</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p style="font-size: 11px; color: var(--text-3); margin-top: 0.5rem;">Hovedkilder: SSB tabell 08231 (formuesskatt etter intervaller), 08815 (formue etter komponenter), 07758 (utbytte etter intervaller). Civita-notat «Nullskatteytere flest er ikke rike» (Mathilde Fasting, januar 2025). Klassekampen 12.07.2024 (SSB-rapport om nullskatteytere). TV2/SSB-analyse mai 2026 om konsekvenser av å fjerne formuesskatten. LO «Alt du trenger å vite om formuesskatt». NOU 2022:20 (Skatteutvalget).</p>
+</section>
+
+
+<!-- ============ FOKUS SMÅ ============ -->
+<section id="smaa">
+  <h2>Fokus: småbedriftene under 10 ansatte</h2>
+  <p class="section-meta">593 777 bedrifter — 90,2 % av alle norske bedrifter</p>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <p class="stat-label">Selskapsskatt 2024</p>
+      <p class="stat-value">~7 mrd.</p>
+      <p class="stat-sub">0,22 % av off. inntekter</p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-label">Sysselsatte</p>
+      <p class="stat-value">~770 000</p>
+      <p class="stat-sub">43 % av privat sektor</p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-label">Snittskatt per bedrift</p>
+      <p class="stat-value">12 000 kr</p>
+      <p class="stat-sub">2/3 betaler 0 i skatt</p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-label">Snitt sysselsatte</p>
+      <p class="stat-value">1,3 personer</p>
+      <p class="stat-sub">Mest ENK og 1-pers. AS</p>
+    </div>
+  </div>
+
+  <h3>Fordeling innenfor småbedriftssegmentet</h3>
+
+  <table class="data">
+    <thead>
+      <tr>
+        <th>Størrelse</th>
+        <th class="num">Antall bedrifter</th>
+        <th class="num">Sysselsatte</th>
+        <th class="num">Selskapsskatt</th>
+        <th class="num">Per bedrift</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>0 ansatte</td>
+        <td class="num">450 559</td>
+        <td class="num">~158 000</td>
+        <td class="num">~1,1 mrd.</td>
+        <td class="num">~2 400 kr</td>
+      </tr>
+      <tr>
+        <td>1–4 ansatte</td>
+        <td class="num">102 882</td>
+        <td class="num">~309 000</td>
+        <td class="num">~2,5 mrd.</td>
+        <td class="num">~24 000 kr</td>
+      </tr>
+      <tr>
+        <td>5–9 ansatte</td>
+        <td class="num">40 336</td>
+        <td class="num">~303 000</td>
+        <td class="num">~3,5 mrd.</td>
+        <td class="num">~87 000 kr</td>
+      </tr>
+      <tr class="total">
+        <td>Sum &lt; 10 ansatte</td>
+        <td class="num">593 777</td>
+        <td class="num">~770 000</td>
+        <td class="num">~7,1 mrd.</td>
+        <td class="num">~12 000 kr</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="explain">
+    <p><strong>0 ansatte-segmentet (450 559 bedrifter) er overveldende holdinger.</strong> Av disse er antakelig 250 000–300 000 rene holdingsselskap som eier aksjer i andre selskap. Disse betaler nesten ingenting selskapsskatt på grunn av fritaksmodellen — beskatningen skjer først når eier tar utbytte. Kun ca. 2 400 kr i snittskatt per selskap viser hvor lite disse strukturene faktisk bidrar.</p>
+    <p><strong>1–4 ansatte (102 882 bedrifter) er typiske småfirmaer.</strong> Frisører, lokale håndverkere, småkonsulenter, små butikker. Mange tar ut hele overskuddet som lønn, slik at selskapsskatten blir minimal. Snittskatten på 24 000 kr/bedrift er en blanding av mange selskaper med 0 i skatt og noen lønnsomme med 100 000–500 000.</p>
+    <p><strong>5–9 ansatte (40 336 bedrifter) er ryggraden.</strong> Disse leverer halvparten av småbedriftsskatten med under 7 % av antall bedrifter. Det er de etablerte håndverksbedriftene, mellomstore butikker, restauranter og spesialiserte tjenestebedrifter. Snitt 87 000 kr/bedrift.</p>
+  </div>
+</section>
+
+<!-- ============ NÆRINGER ============ -->
+<section id="naering">
+  <h2>Næringer som dominerer småbedriftssegmentet</h2>
+  <p class="section-meta">SSB tabell 07091 (2025) — bedrifter under 10 ansatte aggregert til hovednæringer</p>
+
+  <table class="data">
+    <thead>
+      <tr>
+        <th>Hovednæring</th>
+        <th class="num">Antall bedrifter</th>
+        <th class="num">Andel</th>
+        <th>Karakteristikk</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Faglig/teknisk (M)</td>
+        <td class="num">70 838</td>
+        <td class="num">12,4 %</td>
+        <td>Konsulenter, advokater, arkitekter</td>
+      </tr>
+      <tr>
+        <td>Eiendom (L)</td>
+        <td class="num">66 388</td>
+        <td class="num">11,6 %</td>
+        <td>Domineres av holdingsselskap</td>
+      </tr>
+      <tr>
+        <td>Jordbruk/skog/fiske (A)</td>
+        <td class="num">64 831</td>
+        <td class="num">11,4 %</td>
+        <td>Mange ENK på gårdsbruk</td>
+      </tr>
+      <tr>
+        <td>Bygg- og anlegg (F)</td>
+        <td class="num">64 587</td>
+        <td class="num">11,3 %</td>
+        <td>Håndverkere, små entreprenører</td>
+      </tr>
+      <tr>
+        <td>Varehandel (G)</td>
+        <td class="num">60 082</td>
+        <td class="num">10,5 %</td>
+        <td>Butikker, nettbutikker, agenter</td>
+      </tr>
+      <tr>
+        <td>Helse- og sosial (Q)</td>
+        <td class="num">46 534</td>
+        <td class="num">8,1 %</td>
+        <td>Privatpraksis, fysioterapeuter</td>
+      </tr>
+      <tr>
+        <td>Kultur/underholdning (R)</td>
+        <td class="num">34 017</td>
+        <td class="num">6,0 %</td>
+        <td>Kunstnere, freelancere</td>
+      </tr>
+      <tr>
+        <td>Informasjon/IKT (J)</td>
+        <td class="num">27 236</td>
+        <td class="num">4,8 %</td>
+        <td>IT-konsulenter, media</td>
+      </tr>
+      <tr>
+        <td>Andre næringer</td>
+        <td class="num">159 264</td>
+        <td class="num">23,9 %</td>
+        <td>Industri, transport, finans, undervisning m.m.</td>
+      </tr>
+      <tr class="total">
+        <td>Sum</td>
+        <td class="num">593 777</td>
+        <td class="num">100 %</td>
+        <td>—</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="explain">
+    <p><strong>Tre tydelige strukturmønstre:</strong></p>
+    <p><strong>1. Holding-tunge næringer (88–90 % uten ansatte):</strong> Eiendom, kultur og jordbruk har overveldende andel av "0 ansatte"-segmentet. Disse er ikke aktive sysselsettere — de er enten holdingsselskaper, ENK-personer som arbeider for seg selv, eller passive eiendomsselskap. <strong>De bidrar svært lite til selskapsskatten.</strong></p>
+    <p><strong>2. Fragmenterte håndverk- og handelsnæringer:</strong> Varehandel, servering og bygg/anlegg har en betydelig andel av småbedriftene i 5–9-kategorien — <strong>her finnes de reelle skattebetalerne.</strong> Lokale dagligvarebutikker, klesbutikker, restauranter, mindre byggefirmaer.</p>
+    <p><strong>3. Profesjonsbasert tjenesteyting (M, J, Q):</strong> IT, faglig tjenesteyting, helse — typisk én partner som driver eget AS. Lønnsomme per hode, men eieren tar ut mye som lønn, så selskapsskatten blir moderat.</p>
+    <p><strong>Konsekvens:</strong> Bare ca. 30 % av småbedriftene har faktiske ansatte og kjernedrift. Resten er holdinger, hobby-AS, ENK-er, eller passive strukturer.</p>
+  </div>
+</section>
+
+<!-- ============ SCENARIER ============ -->
+<section id="scenarier">
+  <h2>Hva skjer hvis selskapsskatten endres?</h2>
+  <p class="section-meta">Statisk provenyberegning på 2024-grunnlag — før atferdseffekter</p>
+
+  <h3>Scenario 1: 22 % → 20 % (skattekutt)</h3>
+
+  <div class="explain">
+    <p>En reduksjon på 2 prosentpoeng er en relativ reduksjon på 9,1 % i skatten per krone overskudd. Statisk provenytap: ca. <strong>−19 mrd. kr/år</strong>.</p>
+  </div>
+
+  <table class="data">
+    <thead>
+      <tr>
+        <th>Segment</th>
+        <th class="num">Skatt 22 %</th>
+        <th class="num">Skatt 20 %</th>
+        <th class="num">Endring</th>
+        <th class="num">Per selskap</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Petroleum (ordinær del)</td>
+        <td class="num">121,0 mrd.</td>
+        <td class="num">110,0 mrd.</td>
+        <td class="num">−11,0 mrd.</td>
+        <td class="num">−367 mill.</td>
+      </tr>
+      <tr>
+        <td>Store fastland (≥100 ans.)</td>
+        <td class="num">47,0 mrd.</td>
+        <td class="num">42,7 mrd.</td>
+        <td class="num">−4,3 mrd.</td>
+        <td class="num">−1,1 mill.</td>
+      </tr>
+      <tr>
+        <td>Mellomstore (10–99 ans.)</td>
+        <td class="num">28,0 mrd.</td>
+        <td class="num">25,5 mrd.</td>
+        <td class="num">−2,5 mrd.</td>
+        <td class="num">−42 000 kr</td>
+      </tr>
+      <tr>
+        <td>Småbedrifter (&lt; 10 ans.)</td>
+        <td class="num">7,1 mrd.</td>
+        <td class="num">6,5 mrd.</td>
+        <td class="num">−0,6 mrd.</td>
+        <td class="num">−1 100 kr</td>
+      </tr>
+      <tr>
+        <td>Finans (allerede 25 %)</td>
+        <td class="num">29,6 mrd.</td>
+        <td class="num">29,6 mrd.</td>
+        <td class="num">0</td>
+        <td class="num">uberørt</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Scenario 2: 22 % → 25 % (skatteøkning)</h3>
+
+  <div class="explain">
+    <p>En økning på 3 prosentpoeng er en relativ økning på 13,6 % i skatten per krone overskudd. Statisk provenyøkning: ca. <strong>+28,5 mrd. kr/år</strong>.</p>
+    <p>Petroleumsselskapene alene bærer 57,9 % av økningen — <strong>en generell selskapsskatteøkning er først og fremst en petroleumsskatteøkning</strong>.</p>
+  </div>
+
+  <table class="data">
+    <thead>
+      <tr>
+        <th>Segment</th>
+        <th class="num">Skatt 22 %</th>
+        <th class="num">Skatt 25 %</th>
+        <th class="num">Endring</th>
+        <th class="num">Per selskap</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Petroleum (ordinær del)</td>
+        <td class="num">121,0 mrd.</td>
+        <td class="num">137,5 mrd.</td>
+        <td class="num">+16,5 mrd.</td>
+        <td class="num">+550 mill.</td>
+      </tr>
+      <tr>
+        <td>Store fastland (≥100 ans.)</td>
+        <td class="num">47,0 mrd.</td>
+        <td class="num">53,4 mrd.</td>
+        <td class="num">+6,4 mrd.</td>
+        <td class="num">+1,6 mill.</td>
+      </tr>
+      <tr>
+        <td>Mellomstore (10–99 ans.)</td>
+        <td class="num">28,0 mrd.</td>
+        <td class="num">31,8 mrd.</td>
+        <td class="num">+3,8 mrd.</td>
+        <td class="num">+63 000 kr</td>
+      </tr>
+      <tr>
+        <td>Småbedrifter (&lt; 10 ans.)</td>
+        <td class="num">7,1 mrd.</td>
+        <td class="num">8,1 mrd.</td>
+        <td class="num">+1,0 mrd.</td>
+        <td class="num">+1 700 kr</td>
+      </tr>
+      <tr>
+        <td>Finans (allerede 25 %)</td>
+        <td class="num">29,6 mrd.</td>
+        <td class="num">29,6 mrd.</td>
+        <td class="num">0</td>
+        <td class="num">uberørt</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout callout-warn">
+    <p><strong>Tre asymmetrier å merke seg:</strong></p>
+    <p><strong>1. Petroleum dominerer.</strong> Den store overskuddsmaskinen på sokkelen tar 58 % av en hvilken som helst general satsendring. Det betyr at "selskapsskatt" som politisk knapp i Norge nesten alltid er en petroleumsskatt-knapp i forkledning.</p>
+    <p><strong>2. Småbedrifter berøres marginalt.</strong> Selv en kraftig økning til 25 % gir bare ca. 1 700 kr ekstra utgifter per småbedrift i året — knapt målbart i drift. Men reduserer det 593 000 entreprenører som ser på framtidsutsikter, kan signaleffekten være større enn provenyeffekten.</p>
+    <p><strong>3. Finansnæringen er beskyttet.</strong> DNB og sparebankene betaler allerede 25 % gjennom finansskatten. En generell sats-økning til 25 % rammer dem ikke — for å treffe finansnæringen må også finansskatten heves.</p>
+  </div>
+
+  <h3>Atferdseffekter — det reelle bildet</h3>
+
+  <div class="explain">
+    <p>Statisk beregning antar uendret atferd. I praksis vil bedrifter respondere — og responsen er svært ulik mellom store og små:</p>
+    <p><strong>Store/multinasjonale (sterke responser):</strong> Profitt-flytting via internprising, royalty- og rentebetalinger til lavskatteland. Skatteetaten anslår at norske multinasjonale i dag flytter 25–30 mrd. kr i overskudd ut årlig. Investeringseffekt: internasjonale konsern sammenligner Norge med Sverige (20,6 %), Danmark (22 %), Irland (12,5 %).</p>
+    <p><strong>Småbedrifter (svake responser):</strong> En frisør i Bodø flytter ikke til Cypern. Atferdseffektene begrenser seg primært til hvor mye eieren tar ut som lønn vs. utbytte.</p>
+    <p><strong>Etter atferdsjustering:</strong> Den faktiske provenyøkningen ved 22→25 % er sannsynligvis ikke 28,5 mrd., men 20–24 mrd. — etter at man tar hensyn til økt profitt-flytting og redusert investering.</p>
+  </div>
+
+  <h3>Historisk kontekst</h3>
+
+  <div class="explain">
+    <p>Norge har hatt jevn nedgang i selskapsskatten siste 10–15 år: 28 % (2013) → 27 % (2014–16) → 24 % (2017–18) → 23 % (2019) → 22 % (2020 →). Hver senking ble begrunnet med konkurransedyktighet mot OECD-snittet.</p>
+    <p>I statsbudsjettet 2026 holdes satsen på 22 %. Regjeringen har varslet en større skattereform i 2027 med "særlig vekt på beskatning av næringsvirksomhet og eiere".</p>
+  </div>
+</section>
+
+<!-- ============ FULLBILDE ============ -->
+<section id="fullbilde">
+  <h2>Fullbilde — det skjulte bidraget fra småbedrifter</h2>
+
+  <p>Selskapsskatten på 7 mrd. fra småbedriftene er bare en liten del av deres totale bidrag til fellesskapet. De 770 000 sysselsatte og deres eiere genererer en rekke andre skatter:</p>
+
+  <table class="data">
+    <thead>
+      <tr>
+        <th>Skatteform</th>
+        <th class="num">Estimat</th>
+        <th>Hvordan beregnet</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Selskapsskatt</td>
+        <td class="num">~7 mrd.</td>
+        <td>Triangulert estimat</td>
+      </tr>
+      <tr>
+        <td>Personskatt fra ansatte</td>
+        <td class="num">~115 mrd.</td>
+        <td>770 000 syss. × ~150 000 kr/år</td>
+      </tr>
+      <tr>
+        <td>Arbeidsgiveravgift</td>
+        <td class="num">~50 mrd.</td>
+        <td>500 000 lønnstakere × snittlønn × 14,1 %</td>
+      </tr>
+      <tr>
+        <td>MVA fra omsetning</td>
+        <td class="num">~25 mrd.</td>
+        <td>Andelen av samlet MVA tilskrevet småbedriftenes salg</td>
+      </tr>
+      <tr>
+        <td>Eiernes utbytteskatt</td>
+        <td class="num">~6 mrd.</td>
+        <td>Andel av utbytteskatt fra småbedriftseiere</td>
+      </tr>
+      <tr>
+        <td>Eiernes formuesskatt</td>
+        <td class="num">~3 mrd.</td>
+        <td>Andel av formuesskatt på arbeidende kapital</td>
+      </tr>
+      <tr class="total">
+        <td>Totalt</td>
+        <td class="num">~205 mrd.</td>
+        <td>5–6 % av offentlige inntekter</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout callout-info">
+    <p><strong>Selskapsskatten er bare 4 % av småbedriftenes totale bidrag.</strong> De 7 mrd. i selskapsskatt er toppen av et isfjell — det reelle bidraget er anslagsvis 200 mrd. når man teller alle skatter generert av sysselsetting og eierskap. Det illustrerer hvorfor selskapsskattedebatten ofte gir et misvisende bilde av næringslivets faktiske skatteinnbetalinger.</p>
+  </div>
+
+  <h3>Sammenligning — petroleum vs. småbedrifter</h3>
+
+  <div class="compare-row">
+    <div class="compare-card">
+      <p class="compare-h">Petroleumssektor</p>
+      <div class="compare-row-line"><span>Antall selskap</span><span>30</span></div>
+      <div class="compare-row-line"><span>Sysselsatte</span><span>~30 000</span></div>
+      <div class="compare-row-line"><span>Selskapsskatt</span><span>382 mrd.</span></div>
+      <div class="compare-row-line"><span>Skatt per selskap</span><span>12,7 mrd.</span></div>
+      <div class="compare-row-line"><span>Skatt per ansatt</span><span>12,7 mill.</span></div>
+    </div>
+    <div class="compare-card highlight">
+      <p class="compare-h">Småbedrifter (&lt; 10 ansatte)</p>
+      <div class="compare-row-line"><span>Antall selskap</span><span>593 777</span></div>
+      <div class="compare-row-line"><span>Sysselsatte</span><span>~770 000</span></div>
+      <div class="compare-row-line"><span>Selskapsskatt</span><span>~7 mrd.</span></div>
+      <div class="compare-row-line"><span>Skatt per selskap</span><span>~12 000 kr</span></div>
+      <div class="compare-row-line"><span>Skatt per ansatt</span><span>~9 000 kr</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HISTORIKK / TIDSSERIE ============ -->
+<section id="historikk">
+  <h2>Appendix — tidsserie 2020–2025</h2>
+  <p class="section-meta">Verifiserte SSB-tall (tabell 14668, oppdatert 5. mars 2026). Alle beløp i milliarder kroner.</p>
+
+  <p>Seks år som har vært ekstraordinære i norsk skattehistorie: pandemi, energikrise, oljepris-rekorder og normalisering. Bildet under viser hvordan ulike skattekilder har beveget seg, slik at 2024-tallene kan settes i kontekst — og hvordan utviklingen fortsatte inn i 2025.</p>
+
+  <div class="timeseries-card">
+    <div class="ts-header">
+      <p class="ts-title">Offentlig forvaltnings totale inntekter</p>
+      <span class="ts-current">3 264 mrd. (2025)</span>
+    </div>
+    <p class="ts-change">2020: 1 875 → 2022: 3 618 (rekord) → 2024: 3 218 → 2025: 3 264 mrd. Fortsatt høyt nivå, kun marginal vekst fra 2024.</p>
+    <svg class="ts-svg" viewBox="0 0 500 60" preserveAspectRatio="none" role="img" aria-label="Tidsserie offentlig forvaltnings inntekter 2020-2025">
+      <polyline fill="none" stroke="var(--line)" stroke-width="2" points="20,55 112,39 204,5 296,17 388,16 480,15"/>
+      <circle cx="20" cy="55" r="3" fill="var(--line)"/>
+      <circle cx="112" cy="39" r="3" fill="var(--line)"/>
+      <circle cx="204" cy="5" r="4" fill="var(--line)"/>
+      <circle cx="296" cy="17" r="3" fill="var(--line)"/>
+      <circle cx="388" cy="16" r="3" fill="var(--line)"/>
+      <circle cx="480" cy="15" r="4" fill="var(--line)" stroke="var(--bg)" stroke-width="1.5"/>
+    </svg>
+    <div class="ts-axis"><span>2020</span><span>2021</span><span>2022</span><span>2023</span><span>2024</span><span>2025</span></div>
+  </div>
+
+  <div class="timeseries-card">
+    <div class="ts-header">
+      <p class="ts-title">Petroleumsskatt — total</p>
+      <span class="ts-current">343 mrd. (2025)</span>
+    </div>
+    <p class="ts-change">2020: 17 → 2022: 883 (rekord, energikrise) → 2024: 382 → 2025: 343 mrd. Fortsatt fallende fra rekordnivåer. Mest volatile post i hele systemet.</p>
+    <svg class="ts-svg" viewBox="0 0 500 60" preserveAspectRatio="none" role="img" aria-label="Tidsserie petroleumsskatt 2020-2025">
+      <polyline fill="none" stroke="#D85A30" stroke-width="2" points="20,55 112,39 204,5 296,29 388,34 480,36"/>
+      <circle cx="20" cy="55" r="3" fill="#D85A30"/>
+      <circle cx="112" cy="39" r="3" fill="#D85A30"/>
+      <circle cx="204" cy="5" r="4" fill="#D85A30"/>
+      <circle cx="296" cy="29" r="3" fill="#D85A30"/>
+      <circle cx="388" cy="34" r="3" fill="#D85A30"/>
+      <circle cx="480" cy="36" r="4" fill="#D85A30" stroke="var(--bg)" stroke-width="1.5"/>
+    </svg>
+    <div class="ts-axis"><span>2020</span><span>2021</span><span>2022</span><span>2023</span><span>2024</span><span>2025</span></div>
+  </div>
+
+  <div class="timeseries-card">
+    <div class="ts-header">
+      <p class="ts-title">Selskapsskatt fastland (ordinær)</p>
+      <span class="ts-current">114,5 mrd. (2025)</span>
+    </div>
+    <p class="ts-change">2020: 78 → 2022/23: 120 (rekord) → 2024: 110 → 2025: 115 mrd. Solid vekst tilbake fra 2024-dipp.</p>
+    <svg class="ts-svg" viewBox="0 0 500 60" preserveAspectRatio="none" role="img" aria-label="Tidsserie selskapsskatt fastland 2020-2025">
+      <polyline fill="none" stroke="#534AB7" stroke-width="2" points="20,55 112,24 204,5 296,5 388,18 480,12"/>
+      <circle cx="20" cy="55" r="3" fill="#534AB7"/>
+      <circle cx="112" cy="24" r="3" fill="#534AB7"/>
+      <circle cx="204" cy="5" r="3" fill="#534AB7"/>
+      <circle cx="296" cy="5" r="3" fill="#534AB7"/>
+      <circle cx="388" cy="18" r="3" fill="#534AB7"/>
+      <circle cx="480" cy="12" r="4" fill="#534AB7" stroke="var(--bg)" stroke-width="1.5"/>
+    </svg>
+    <div class="ts-axis"><span>2020</span><span>2021</span><span>2022</span><span>2023</span><span>2024</span><span>2025</span></div>
+  </div>
+
+  <div class="timeseries-card">
+    <div class="ts-header">
+      <p class="ts-title">Grunnrenteskatt (kraft + havbruk + vind)</p>
+      <span class="ts-current">20,5 mrd. (2025)</span>
+    </div>
+    <p class="ts-change">2020: 4 → 2022: 47 (energikrise) → 2024: 17 → 2025: 20 mrd. Stigning fra 2024 — kraftpriser og havbruk.</p>
+    <svg class="ts-svg" viewBox="0 0 500 60" preserveAspectRatio="none" role="img" aria-label="Tidsserie grunnrenteskatt 2020-2025">
+      <polyline fill="none" stroke="#0F6E56" stroke-width="2" points="20,55 112,35 204,5 296,26 388,40 480,36"/>
+      <circle cx="20" cy="55" r="3" fill="#0F6E56"/>
+      <circle cx="112" cy="35" r="3" fill="#0F6E56"/>
+      <circle cx="204" cy="5" r="4" fill="#0F6E56"/>
+      <circle cx="296" cy="26" r="3" fill="#0F6E56"/>
+      <circle cx="388" cy="40" r="3" fill="#0F6E56"/>
+      <circle cx="480" cy="36" r="4" fill="#0F6E56" stroke="var(--bg)" stroke-width="1.5"/>
+    </svg>
+    <div class="ts-axis"><span>2020</span><span>2021</span><span>2022</span><span>2023</span><span>2024</span><span>2025</span></div>
+  </div>
+
+  <div class="timeseries-card">
+    <div class="ts-header">
+      <p class="ts-title">Merverdiavgift (MVA)</p>
+      <span class="ts-current">401 mrd. (2025)</span>
+    </div>
+    <p class="ts-change">2020: 312 → 2024: 387 → 2025: 401 mrd. Stabil økning ~5–6 % per år — speiler økonomisk aktivitet.</p>
+    <svg class="ts-svg" viewBox="0 0 500 60" preserveAspectRatio="none" role="img" aria-label="Tidsserie merverdiavgift 2020-2025">
+      <polyline fill="none" stroke="#639922" stroke-width="2" points="20,55 112,40 204,21 296,18 388,13 480,5"/>
+      <circle cx="20" cy="55" r="3" fill="#639922"/>
+      <circle cx="112" cy="40" r="3" fill="#639922"/>
+      <circle cx="204" cy="21" r="3" fill="#639922"/>
+      <circle cx="296" cy="18" r="3" fill="#639922"/>
+      <circle cx="388" cy="13" r="3" fill="#639922"/>
+      <circle cx="480" cy="5" r="4" fill="#639922" stroke="var(--bg)" stroke-width="1.5"/>
+    </svg>
+    <div class="ts-axis"><span>2020</span><span>2021</span><span>2022</span><span>2023</span><span>2024</span><span>2025</span></div>
+  </div>
+
+  <h3>Detaljert tidsserie</h3>
+
+  <table class="data">
+    <thead>
+      <tr>
+        <th>År</th>
+        <th class="num">Total off. inntekt</th>
+        <th class="num">Skatt på inntekt og formue</th>
+        <th class="num">Petroleum total</th>
+        <th class="num">– ordinær 22 %</th>
+        <th class="num">– særskatt 71,8 %</th>
+        <th class="num">Selskap fastland</th>
+        <th class="num">Grunnrente</th>
+        <th class="num">MVA</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>2020</td>
+        <td class="num">1 875</td>
+        <td class="num">517</td>
+        <td class="num">17</td>
+        <td class="num">17</td>
+        <td class="num">0</td>
+        <td class="num">78,0</td>
+        <td class="num">3,9</td>
+        <td class="num">312</td>
+      </tr>
+      <tr>
+        <td>2021</td>
+        <td class="num">2 449</td>
+        <td class="num">911</td>
+        <td class="num">299</td>
+        <td class="num">95</td>
+        <td class="num">205</td>
+        <td class="num">103,9</td>
+        <td class="num">20,9</td>
+        <td class="num">339</td>
+      </tr>
+      <tr>
+        <td>2022</td>
+        <td class="num">3 618</td>
+        <td class="num">1 552</td>
+        <td class="num">883</td>
+        <td class="num">263</td>
+        <td class="num">620</td>
+        <td class="num">120,4</td>
+        <td class="num">47,1</td>
+        <td class="num">372</td>
+      </tr>
+      <tr>
+        <td>2023</td>
+        <td class="num">3 192</td>
+        <td class="num">1 145</td>
+        <td class="num">465</td>
+        <td class="num">145</td>
+        <td class="num">320</td>
+        <td class="num">120,4</td>
+        <td class="num">29,0</td>
+        <td class="num">378</td>
+      </tr>
+      <tr>
+        <td>2024</td>
+        <td class="num">3 218</td>
+        <td class="num">1 079</td>
+        <td class="num">382</td>
+        <td class="num">121</td>
+        <td class="num">261</td>
+        <td class="num">109,5</td>
+        <td class="num">17,1</td>
+        <td class="num">387</td>
+      </tr>
+      <tr class="total">
+        <td>2025</td>
+        <td class="num">3 264</td>
+        <td class="num">1 080</td>
+        <td class="num">343</td>
+        <td class="num">113</td>
+        <td class="num">230</td>
+        <td class="num">114,5</td>
+        <td class="num">20,5</td>
+        <td class="num">401</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Estimert SMB- og småbedriftsbidrag historisk</h3>
+
+  <div class="explain">
+    <p>Anvendt samme andelsestimat over tid (32 % SMB, 6,4 % under 10 ansatte av fastlandsselskapsskatten). Tallene er omtrentlige — fordelingen kan ha endret seg noe år for år, men strukturen har vært stabil.</p>
+  </div>
+
+  <table class="data">
+    <thead>
+      <tr>
+        <th>År</th>
+        <th class="num">Selskapsskatt fastland</th>
+        <th class="num">SMB &lt; 100 ans. (est.)</th>
+        <th class="num">Småbedrifter &lt; 10 ans. (est.)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>2020</td>
+        <td class="num">78,0 mrd.</td>
+        <td class="num">~25 mrd.</td>
+        <td class="num">~5,0 mrd.</td>
+      </tr>
+      <tr>
+        <td>2021</td>
+        <td class="num">103,9 mrd.</td>
+        <td class="num">~33 mrd.</td>
+        <td class="num">~6,6 mrd.</td>
+      </tr>
+      <tr>
+        <td>2022</td>
+        <td class="num">120,4 mrd.</td>
+        <td class="num">~38 mrd.</td>
+        <td class="num">~7,7 mrd.</td>
+      </tr>
+      <tr>
+        <td>2023</td>
+        <td class="num">120,4 mrd.</td>
+        <td class="num">~38 mrd.</td>
+        <td class="num">~7,7 mrd.</td>
+      </tr>
+      <tr>
+        <td>2024</td>
+        <td class="num">109,5 mrd.</td>
+        <td class="num">~35 mrd.</td>
+        <td class="num">~7,0 mrd.</td>
+      </tr>
+      <tr class="total">
+        <td>2025</td>
+        <td class="num">114,5 mrd.</td>
+        <td class="num">~37 mrd.</td>
+        <td class="num">~7,3 mrd.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Tre observasjoner fra tidsserien</h3>
+
+  <div class="callout callout-success">
+    <p><strong>1. Petroleum styrer det store bildet.</strong> Mellom 2021 og 2022 nesten tredoblet petroleumsskatten seg (fra 299 til 883 mrd.) på grunn av energikrisen. I samme periode økte fastlandsselskapsskatten kun 16 %. Petroleumsskatten har siden falt videre fra 382 mrd. (2024) til 343 mrd. (2025), og forventes å falle ytterligere i 2026.</p>
+    <p><strong>2. Pandemiåret 2020 var et lavpunkt på alle fronter.</strong> Petroleumsskatten var bare 17 mrd. (oljepris under 30 dollar deler av året), grunnrenteskatten var 4 mrd. Total skatteinngang var nesten halvparten av 2022-rekorden.</p>
+    <p><strong>3. Fastlandsbedriftenes skatteinngang er bemerkelsesverdig stabil.</strong> Selskapsskatten fastland har holdt seg mellom 78 og 120 mrd. — 2025-tallet på 114,5 mrd. viser fortsatt solid vekst etter en mindre dipp i 2024. Variasjonen reflekterer normal konjunkturutvikling, ikke krisedynamikk. Det er en viktig påminnelse om at "norsk næringsliv" er to ulike økonomier: en sokkel-økonomi som svinger ekstremt, og en fastlands-økonomi som er svært forutsigbar.</p>
+    <p><strong>4. Skatt på inntekt og formue er praktisk talt flat 2024–2025</strong> (1 079 → 1 080 mrd., +0,1 %). Det skyldes at petroleumsskatten falt 39 mrd. samtidig som fastlandsselskapsskatten steg 5 mrd. og grunnrenten steg 3 mrd. Hovedforklaringen er lavere oljepriser/produksjon, kompensert av høyere kraftpriser og havbrukspriser.</p>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <h4>Kilder og metode</h4>
+
+  <p><strong>Primærdata:</strong> SSB tabell 14668 (offentlig forvaltnings inntekter 2020–2025, oppdatert 5. mars 2026), SSB tabell 10486 (statsregnskapet 1985–2025, oppdatert 9. mars 2026), SSB tabell 14438 (selskapsskatt fastland), SSB tabell 07091 (bedrifter etter næring og ansatte 2025), SSB tabell 12936 (sysselsetting per størrelsesgruppe), <strong>SSB tabell 14440 (selskap i formuesskatteposisjon per næring)</strong>. <strong>Eierbeskatning:</strong> SSB tabell 08231 (formuesskatt etter intervaller 1999–2024), SSB tabell 08815 (formue etter skattekomponenter 1999–2024), SSB tabell 07758 (skjermingsgrunnlag og utbytte 2007–2024), <strong>SSB tabell 09445 (Oslo Børs eierfordeling 2012K1–2025K4)</strong>. <strong>Statsrekneskapen 2025</strong> (Meld. St. 3 (2025–2026), Finansdepartementet, lagt fram 24. april 2026). NBIM Årsrapport 2024 (publisert 25. februar 2025). DFØ statsregnskapet.no (historier 2024 og 2025). Norskpetroleum.no (regjeringen-data, oppdatert 27.02.2026). Skatteetatens skattelister for grunnrenteskatt 2024 (vannkraft, havbruk, vindkraft). Skatteetatens analyse av multinasjonale selskaper (2018). NRKs gjennomgang av Top 10 fastlandskonsern (desember 2025). <strong>Eierbeskatning-perspektiver:</strong> Civita-notat «Nullskatteytere flest er ikke rike» (Mathilde Fasting, januar 2025), Civita/NyAnalyse/BI-rapport om utbytteforskjeller; Civita-notat «Privat eierskaps betydning for arbeidsplasser» (juni 2022); LO «Alt du trenger å vite om formuesskatt»; NOU 2022:20 (Skatteutvalget); Klassekampen 12.07.2024 (SSB-rapport om nullskatteytere). <strong>Atferdseffekt-forskning:</strong> Ole-Andreas Elvik Næss (NHH/SNF) — analyser av utflytting til Sveits og «monsterrabatten» (DN 2023; NHH Bulletin april 2025); Frischsenteret (2020) om formuesskatt og sysselsetting; Finansavisen om Sveits-utflyttinger (2022–2024). Regjeringen.no — Statsbudsjettet 2024, 2025 og 2026; Skattesatser 2026.</p>
+
+  <p><strong>Trianguleringer:</strong> SSB publiserer ikke selskapsskatt fordelt på bedriftsstørrelse. Estimatene for SMB-segmentet (35 mrd.) og småbedrifter under 10 ansatte (7 mrd.) er triangulert fra tre uavhengige kilder med usikkerhetsbånd 25–45 mrd. og 5–10 mrd. respektivt. Sysselsettingstall for under-10-segmentet er beregnet ved snitt-størrelser fra SSB strukturstatistikk (industri og varehandel som referansenæringer).</p>
+
+  <p><strong>Provenymodellen:</strong> Statisk modell uten atferdsjustering. Implisitt skattegrunnlag = skatt 2024 / 0,22. Nytt proveny = grunnlag × ny sats. Atferdseffektene er nevnt kvalitativt men ikke kvantifisert i tabellene.</p>
+
+  <p><strong>Historiske estimater:</strong> SMB- og småbedriftsbidrag for 2020–2023 er beregnet ved å anvende samme andel (32 % og 6,4 % av fastlandsselskapsskatt) som for 2024. Reell fordeling kan variere 2–3 prosentpoeng per år.</p>
+
+  <p><strong>Avgrensninger:</strong> Inntektsåret 2024 er hovedreferanse (siste komplette år med endelige skatteoppgjør). En egen seksjon ("Oppdatering 2025") sammenligner med 2025-regnskapstall fra SSB. 2026-tall er rene budsjettanslag fra Stortinget. SSB tabell 07091 er publisert per 2025. Personskatt og arbeidsgiveravgift fra småbedriftens ansatte er estimert fra snittlønn × sats — ikke direkte målte tall.</p>
+
+  <p><strong>Datakvalitet — sjekk badges:</strong> <span class="badge regnskap">REGNSKAP</span> = endelige tall fra DFØ/SSB. <span class="badge foreløpig">FORELØPIG</span> = revidert anslag, men ikke endelig regnskap. <span class="badge budsjett">BUDSJETT</span> = saldert budsjett vedtatt av Stortinget, faktisk regnskap kan avvike betydelig (som vist for 2024 der SPU-avsetning ble 356 vs. 496 budsjettert).</p>
+
+  <p><strong>Versjon:</strong> v5.7 — generert mai 2026. Språkvask: dempet overdreven dramatikk («eksplodert», «dramatisk»), erstattet tunge ord («provenymessig», «krangler»), profesjonalisert overskrifter, rettet ortografisk feil. Utvidet sammendrag på toppen til 16 nøkkeltall (åtte for offentlige finanser, åtte for eierbeskatning) og seks nøkkelinnsikter. Tidligere v5.6: utvidet atferdseffekt-analyse med fire dokumenterte mekanismer og stolpediagram. Realistisk anslag for reformkostnad: 8–11 mrd. kr/år (NHH-tolkning). Filen er en ren standalone uten eksterne avhengigheter — kan deles via e-post som vedlegg eller via skylenke i Messenger/chat.</p>
+
+  <p class="print-tip">Denne artefakten er fri til distribusjon og videreformidling. For oppdaterte tall, sjekk SSB Statistikkbanken og Skatteetatens årlige analyser. Fungerer i alle moderne nettlesere uten internett-tilgang.</p>
+</footer>
+
+</div>
+
+</body>
+</html>

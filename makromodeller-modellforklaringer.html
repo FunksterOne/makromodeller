@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modell-utforsker — norske makroøkonomiske modeller, parameter for parameter</title>
+<style>
+  :root{
+    --ink:#13233a; --ink-soft:#3d5070; --slate:#5d6b80;
+    --line:#d4dae3; --line-soft:#e7ebf1; --paper:#ffffff;
+    --mist:#f4f6f9; --mist-2:#eef1f6;
+    --accent:#c0552b; --accent-soft:#f6e7df;
+    --teal:#1f6f6b; --teal-soft:#e2efee;     /* DSGE */
+    --gold:#9a7b1f; --gold-soft:#f2ecdb;     /* CGE */
+    --indigo:#3a4a8c; --indigo-soft:#e6e9f5; /* makroøkonometri */
+    --micro:#c0552b; --micro-soft:#f6e7df;   /* mikro = terrakotta */
+    --ok:#2f7d4f; --warn:#b8860b; --bad:#b23b3b;
+    --mono:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    --serif:Georgia,"Times New Roman",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--sans);color:var(--ink);background:var(--mist-2);line-height:1.55;
+    -webkit-font-smoothing:antialiased;font-size:15px}
+  .wrap{max-width:1180px;margin:0 auto;padding:24px 18px 90px}
+
+  /* selector */
+  .selector{position:sticky;top:0;z-index:50;background:rgba(244,246,249,.96);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);padding:12px 18px}
+  .selector-inner{max-width:1180px;margin:0 auto}
+  .selector .lbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--slate);margin-bottom:8px}
+  .btns{display:flex;flex-wrap:wrap;gap:7px}
+  .mbtn{font-family:var(--sans);font-size:12.5px;font-weight:600;padding:7px 13px;border-radius:6px;
+    border:1px solid var(--line);background:var(--paper);color:var(--ink-soft);cursor:pointer;transition:.12s;
+    display:inline-flex;align-items:center;gap:7px}
+  .mbtn:hover{border-color:var(--ink-soft);transform:translateY(-1px)}
+  .mbtn .fam{width:9px;height:9px;border-radius:2px;display:inline-block}
+  .mbtn.active{color:#fff;border-color:transparent}
+  .mbtn.active.econ{background:var(--indigo)} .mbtn.active.dsge{background:var(--teal)}
+  .mbtn.active.cge{background:var(--gold)} .mbtn.active.micro{background:var(--micro)}
+  .fam.econ{background:var(--indigo)} .fam.dsge{background:var(--teal)}
+  .fam.cge{background:var(--gold)} .fam.micro{background:var(--micro)}
+
+  .intro{background:var(--paper);border:1px solid var(--line);border-radius:3px;padding:30px 38px 32px;
+    margin:20px 0 22px;position:relative}
+  .intro::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--ink);border-radius:2px 0 0 2px}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:9px}
+  .eyebrow.neutral{color:var(--slate)}
+  h1{font-family:var(--serif);font-weight:600;font-size:29px;line-height:1.15;margin-bottom:8px}
+  h2{font-family:var(--serif);font-weight:600;font-size:24px;line-height:1.18;margin-bottom:4px}
+  h3{font-family:var(--serif);font-weight:600;font-size:17px;margin:0 0 6px}
+  .sub{font-size:16px;color:var(--ink-soft);max-width:82ch}
+  p{margin:0 0 12px;color:var(--ink-soft)}
+  strong{color:var(--ink);font-weight:600}
+  .legend{display:flex;flex-wrap:wrap;gap:16px;margin:16px 0 0}
+  .legend span{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--slate)}
+  .legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
+  .term{font-family:var(--mono);font-size:.85em;background:var(--mist);border:1px solid var(--line-soft);padding:1px 5px;border-radius:3px;color:var(--ink);white-space:nowrap}
+  .small{font-size:12.5px;color:var(--slate)}
+
+  /* family overview cards */
+  .fam-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:18px}
+  @media(max-width:820px){.fam-grid{grid-template-columns:1fr 1fr}}
+  .fam-card{border:1px solid var(--line-soft);border-radius:4px;padding:13px 15px;border-top:3px solid}
+  .fam-card.econ{border-top-color:var(--indigo);background:var(--indigo-soft)}
+  .fam-card.dsge{border-top-color:var(--teal);background:var(--teal-soft)}
+  .fam-card.cge{border-top-color:var(--gold);background:var(--gold-soft)}
+  .fam-card.micro{border-top-color:var(--micro);background:var(--micro-soft)}
+  .fam-card h4{font-size:13px;margin-bottom:5px}
+  .fam-card p{font-size:12px;margin:0}
+
+  /* panel */
+  .panel-wrap{background:var(--paper);border:1px solid var(--line);border-radius:3px;padding:34px 40px 40px;position:relative;min-height:60vh}
+  .panel-wrap::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:2px 0 0 2px}
+  .panel-wrap.econ::before{background:var(--indigo)} .panel-wrap.dsge::before{background:var(--teal)}
+  .panel-wrap.cge::before{background:var(--gold)} .panel-wrap.micro::before{background:var(--micro)}
+  @media(max-width:720px){.panel-wrap{padding:24px 20px 30px}}
+
+  .badge{display:inline-block;font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.04em;padding:3px 9px;border-radius:20px;text-transform:uppercase;vertical-align:middle}
+  .b-econ{background:var(--indigo-soft);color:var(--indigo)} .b-dsge{background:var(--teal-soft);color:var(--teal)}
+  .b-cge{background:var(--gold-soft);color:var(--gold)} .b-micro{background:var(--micro-soft);color:var(--micro)}
+  .meta-row{display:flex;flex-wrap:wrap;gap:8px 20px;margin:10px 0 6px;font-size:12.5px;color:var(--slate)}
+  .meta-row b{color:var(--ink)}
+  .governing{font-size:16px;line-height:1.45;color:var(--ink);font-weight:600;border-left:3px solid var(--accent);
+    padding:9px 0 9px 16px;margin:14px 0 22px;background:linear-gradient(90deg,var(--accent-soft),transparent 62%)}
+  .rule{height:1px;background:var(--line);border:0;margin:24px 0}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+  @media(max-width:820px){.grid2,.grid3{grid-template-columns:1fr}}
+
+  .box{background:var(--mist);border:1px solid var(--line-soft);border-radius:4px;padding:15px 17px}
+  .box h4{font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--slate);font-weight:700;margin-bottom:9px}
+  .box.accent{background:var(--accent-soft);border-color:#ecd3c7}
+  ul.tight{margin:0;padding-left:18px}
+  ul.tight li{margin-bottom:6px;color:var(--ink-soft);font-size:13px}
+  ul.tight li::marker{color:var(--accent)}
+  .inject{font-family:var(--mono);font-size:10.5px;color:var(--accent);font-weight:700}
+  .inject::before{content:"◣ "}
+
+  .eq{background:#0f1d30;color:#e8edf4;border-radius:5px;padding:16px 20px;font-family:var(--mono);
+    font-size:13.5px;line-height:1.95;margin:10px 0;overflow-x:auto}
+  .eq .c{color:#7fa8d8} .eq .hl{color:#e9a06f;font-weight:600} .eq .v2{color:#9fd6b0}
+  .eq-cap{font-size:12px;color:var(--slate);margin:2px 0 14px}
+
+  table.tbl{width:100%;border-collapse:collapse;font-size:13px;margin:6px 0}
+  table.tbl th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--slate);font-weight:700;padding:9px 10px;border-bottom:2px solid var(--ink);vertical-align:bottom}
+  table.tbl td{padding:8px 10px;border-bottom:1px solid var(--line-soft);color:var(--ink-soft);vertical-align:top}
+  table.tbl tr:last-child td{border-bottom:0}
+  table.tbl td.sym{font-family:var(--mono);color:var(--accent);font-weight:700;white-space:nowrap}
+  table.tbl td.val{font-family:var(--mono);color:var(--ink);white-space:nowrap}
+  table.tbl tbody tr:hover{background:var(--mist)}
+  .who{font-family:var(--mono);font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;white-space:nowrap}
+  .who.est{background:var(--indigo-soft);color:var(--indigo)}
+  .who.kal{background:var(--gold-soft);color:var(--gold)}
+  .who.kalest{background:var(--teal-soft);color:var(--teal)}
+  .who.hum{background:var(--accent-soft);color:var(--accent)}
+  .who.mod{background:#e9ecf1;color:var(--slate)}
+
+  .flag{background:var(--accent-soft);border:1px solid #ecd3c7;border-radius:4px;padding:12px 15px;font-size:13px;color:#7a3a20;margin:16px 0}
+  .flag b{color:#5e2c18} .flag::before{content:"⚑ ";font-weight:700}
+  .src{font-size:11.5px;color:var(--slate);line-height:1.55;margin-top:18px;padding-top:12px;border-top:1px solid var(--line-soft)}
+  .src b{color:var(--ink-soft)}
+  .fig-cap{font-size:11.5px;color:var(--slate);font-style:italic;margin-top:8px;text-align:center}
+  svg{max-width:100%;height:auto}
+  .navfoot{display:flex;justify-content:space-between;margin-top:26px;gap:10px}
+  .navfoot button{font-family:var(--sans);font-size:13px;font-weight:600;padding:9px 15px;border-radius:6px;border:1px solid var(--line);background:var(--paper);color:var(--ink-soft);cursor:pointer}
+  .navfoot button:hover{border-color:var(--ink-soft)}
+  .pill{display:inline-block;font-size:11px;font-family:var(--mono);background:var(--mist);border:1px solid var(--line-soft);border-radius:20px;padding:2px 9px;color:var(--ink-soft);margin:2px 4px 2px 0}
+</style>
+</head>
+<body>
+
+<div class="selector">
+  <div class="selector-inner">
+    <div class="lbl">Velg modell — klikk for full forklaring, parametre og figur</div>
+    <div class="btns" id="btns"></div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="intro">
+    <div class="eyebrow">Modell-utforsker · nivå 3 · dyp gjennomgang, modell for modell</div>
+    <h1>Norske makroøkonomiske modeller — hver parameter og forutsetning forklart</h1>
+    <p class="sub">Ni modeller fordelt på fire metodefamilier. For hver modell: hva den er, spørsmålet den svarer på, motoren og likningene, <strong>alle parametrene</strong> (med verdi og hvem som setter dem), forutsetningene mennesket legger inn, og en figur som viser hvordan data og forutsetninger strømmer gjennom modellen til et resultat.</p>
+
+    <div class="legend">
+      <span><i style="background:var(--indigo)"></i> <b>Makroøkonometri</b> — estimert på data</span>
+      <span><i style="background:var(--teal)"></i> <b>DSGE</b> — mikrofundert, optimerende</span>
+      <span><i style="background:var(--gold)"></i> <b>CGE</b> — generell likevekt, kalibrert</span>
+      <span><i style="background:var(--micro)"></i> <b>Mikrosimulering</b> — individ/register</span>
+    </div>
+
+    <div class="fam-grid">
+      <div class="fam-card econ"><h4>Makroøkonometri</h4><p>Likninger estimeres enkeltvis på tidsserier (kointegrasjon + feiljustering). Etterspørselsstyrt kort sikt, tilbudsstyrt lang sikt. <b>KVARTS · MODAG · NAM</b></p></div>
+      <div class="fam-card dsge"><h4>DSGE</h4><p>Hele økonomien utledes fra optimerende aktører med modellkonsistente forventninger. Stram teori, få likninger. <b>NEMO · NORA</b></p></div>
+      <div class="fam-card cge"><h4>CGE</h4><p>Priser klarerer alle markeder samtidig. Kalibrert mot ett basisår, ikke estimert. Lang sikt, struktur, klima. <b>SNOW/MSG · DEMEC</b></p></div>
+      <div class="fam-card micro"><h4>Mikrosimulering</h4><p>Simulerer enkeltindivider fra registerdata. Statisk (skatt) eller dynamisk (livsløp). <b>LOTTE · MOSART</b></p></div>
+    </div>
+
+    <div class="legend" style="margin-top:16px">
+      <span class="small"><b>Forklaring «hvem setter»:</b></span>
+      <span><span class="who est">estimert</span> fra data</span>
+      <span><span class="who kal">kalibrert</span> mot basisår/litteratur</span>
+      <span><span class="who hum">◣ mennesket</span> eksogen forutsetning</span>
+      <span><span class="who mod">modellbestemt</span> endogent</span>
+    </div>
+  </div>
+
+  <div class="panel-wrap" id="panel"></div>
+
+  <div class="navfoot">
+    <button id="prevBtn">‹ Forrige modell</button>
+    <button id="nextBtn">Neste modell ›</button>
+  </div>
+
+  <div class="src" style="max-width:1180px">
+    <b>Gjennomgående forbehold.</b> Parameterverdiene er hentet fra modellenes primærdokumentasjon der de er offentlig tilgjengelige, ellers oppgitt som <em>typiske størrelser for modellklassen</em> og markert. Eksakte posterior-/kalibreringsverdier er versjonsavhengige og endres ved reestimering/rebasering. Likningene er forenklede representasjoner som viser mekanismen, ikke den fullstendige modellkoden. Bygget som følgesvenn til «Norske myndigheters makroøkonomiske modeller — teknisk dypdykk» og det kritiske dashbordet.
+  </div>
+</div>
+
+<script>
+const MODELS = [
+/* ============================= KVARTS ============================= */
+{
+  id:"kvarts", name:"KVARTS", fam:"econ", famLabel:"Makroøkonometrisk",
+  owner:"SSB", horizon:"Kvartal → konjunktur", role:"Kjernemodell for konjunkturprognoser",
+  tagline:"Etterspørselsstyrt på kort sikt, tilbudsstyrt på lang sikt — hundrevis av enkeltestimerte feiljusteringslikninger.",
+  governing:"KVARTS er hjertet i SSBs prognoseapparat. Den består av rundt 2 259 likninger der hver atferdsrelasjon estimeres på data i to ledd: en langsiktig likevekt (kointegrasjon) og en kortsiktig dynamikk som trekker økonomien tilbake mot likevekten.",
+  what:[
+    "KVARTS er en stor, disaggregert makroøkonometrisk modell som beskriver norsk fastlandsøkonomi kvartal for kvartal. Den er motoren bak <em>Konjunkturtendensene</em>, SSBs prognoser fire ganger i året.",
+    "Filosofien er empirisk: «la dataene bestemme». I stedet for å utlede alt fra én teori, estimeres hver sammenheng (konsum, investering, eksport, lønn, priser, sysselsetting) separat på historiske tidsserier. Dette står i bevisst kontrast til DSGE-tradisjonen — og var faglig kjerne i SSB-striden i 2017."
+  ],
+  question:"Hvor er norsk økonomi på vei de neste 2–3 årene, gitt forutsetninger om finanspolitikk, rente, oljepris og internasjonal utvikling?",
+  engineTitle:"Feiljusteringsmekanismen (ECM)",
+  engineText:"Hver relasjon har en langsiktig kointegrasjonsvektor (variablene beveger seg sammen over tid) og en kortsiktig dynamikk med en feiljusteringskoeffisient α som måler hvor raskt avvik fra likevekten lukkes.",
+  equations:[
+    {c:"langsiktig likevekt (kointegrasjon), eks. konsum", h:"<span class='v2'>c*</span><sub>t</sub> = β<sub>0</sub> + <span class='hl'>β<sub>1</sub></span>·<span class='v2'>y</span><sub>t</sub> + <span class='hl'>β<sub>2</sub></span>·<span class='v2'>w</span><sub>t</sub> + <span class='hl'>β<sub>3</sub></span>·<span class='v2'>r</span><sub>t</sub>"},
+    {c:"kortsiktig dynamikk med feiljustering", h:"Δ<span class='v2'>c</span><sub>t</sub> = γ·Δ<span class='v2'>y</span><sub>t</sub> − <span class='hl'>α</span>·( <span class='v2'>c</span><sub>t−1</sub> − <span class='v2'>c*</span><sub>t−1</sub> ) + ε<sub>t</sub>"}
+  ],
+  eqCap:"y = inntekt, w = formue, r = rente, c* = ønsket (likevekts)konsum. β-ene og α estimeres økonometrisk.",
+  params:[
+    {s:"α", n:"Feiljusteringskoeffisient", v:"0,1–0,4 / kv.", w:"est", r:"Hastighet tilbake til likevekt; |α| stor = rask tilpasning"},
+    {s:"β₁", n:"Langsiktig inntektselastisitet (konsum)", v:"≈ 0,7–0,9", w:"est", r:"Hvor mye varig konsum følger varig inntekt"},
+    {s:"β₂", n:"Formueselastisitet", v:"liten, positiv", w:"est", r:"Boligformuens drag på konsumet"},
+    {s:"β₃", n:"Rentefølsomhet", v:"negativ", w:"est", r:"Realrentens effekt på konsum/sparing"},
+    {s:"γ", n:"Kortsiktig inntektsrespons", v:"modellspesifikk", w:"est", r:"Umiddelbar konsumreaksjon på inntektsendring"},
+    {s:"—", n:"Lønnskurve (frontfag)", v:"estimert", w:"est", r:"Lønn følger konkurranseutsatt sektors lønnsevne"},
+    {s:"—", n:"Importpris-gjennomslag", v:"estimert", w:"est", r:"Hvor mye valutakurs/verdenspris slår inn i norske priser"},
+    {s:"G, T, τ", n:"Finanspolitikk", v:"baner", w:"hum", r:"Offentlig forbruk, investering, skattesatser, overføringer"},
+    {s:"i", n:"Rentebane", v:"eksogen", w:"hum", r:"Rente legges inn (eller enkel regel)"},
+    {s:"p*, oljepris", n:"Internasjonale forutsetninger", v:"baner", w:"hum", r:"Eksportmarked, verdenspriser, olje/gass"}
+  ],
+  dataIn:["Kvartalsvis nasjonalregnskap (KNR)","Lønns- og prisstatistikk","Sysselsetting (AKU / A-ordningen)","Renter, valutakurs, kreditt","Internasjonale priser og etterspørsel","Olje-/gasspriser, petroleumsinvestering"],
+  humanSet:["Finanspolitikk: forbruk, investering, skatt, overføringer","Pengepolitikk: rentebane","Internasjonal utvikling: eksportmarked, priser","Petroleum: priser og investeringsbaner"],
+  closure:"Kort sikt: produksjon bestemmes av samlet etterspørsel (keynesiansk). Lang sikt: kapasitet og tilbudsside binder — arbeidsmarked, frontfags-lønnsdannelse og produktivitet bestemmer nivået. Estimeres og kjøres i datasystemet TROLL.",
+  assumptions:[
+    "Likninger estimeres <b>enkeltvis</b>, ikke som ett simultant system.",
+    "Kointegrasjon: variabler har stabile langsiktige sammenhenger.",
+    "Forventninger er i hovedsak <b>bakoverskuende/adaptive</b>, ikke modellkonsistente.",
+    "Frontfagsmodellen forankrer lønnsdannelsen.",
+    "~15 fastlandsnæringer + 3 offentlige sektorer, ~25 produkter i kryssløpet."
+  ],
+  outputs:["Konjunkturprognose (BNP, sysselsetting, inflasjon, rente)","Konjunkturtendensene 4×/år","Leveranse til Finansdepartementet","Kvalitetssikring av KNR"],
+  fig:{ dataIn:["KNR","Lønn/pris","Sysselsetting","Renter, FX, kreditt","Intl. priser","Olje/gass"],
+        assumptions:["Finanspolitikk","Rentebane","Intl. utvikling","Petroleum"],
+        engine:{t:"KVARTS",e:"ECM: c*=βy+…\nΔc=γΔy−α(c−c*)"},
+        outputs:["BNP-bane","Sysselsetting","Inflasjon","Konjunktur­tendensene"]},
+  sources:"SSB «Makroøkonomisk modell for norsk økonomi (KVARTS)»; Haakonsen «KVARTS i praksis V» (Notater 2015/21); Biørn, Jensen & Reymert (1987); Hove & Eika (1994). Flagg: enkelte α-verdier og oppstartsår er versjonsavhengige."
+},
+/* ============================= MODAG ============================= */
+{
+  id:"modag", name:"MODAG", fam:"econ", famLabel:"Makroøkonometrisk",
+  owner:"SSB (drift) · Finansdepartementet (bruker)", horizon:"År → mellomlang sikt", role:"Finanspolitisk arbeidshest",
+  tagline:"KVARTS på årsfrekvens, skreddersydd for finanspolitisk analyse og fiskale multiplikatorer.",
+  governing:"MODAG deler metode og mange relasjoner med KVARTS, men kjører på årsfrekvens og er bygget for å svare på ett spørsmål særlig godt: hvordan slår en finanspolitisk endring ut i økonomien? «En beskrivelse av MODAG vil i hovedsak også være gyldig for KVARTS.»",
+  what:[
+    "MODAG er Finansdepartementets foretrukne modell for å regne makrovirkningen av statsbudsjettet. Den har grovere tidsoppløsning (år) enn KVARTS, men finere næringsinndeling for finanspolitiske formål.",
+    "Siden 2007-versjonen er valutakurs og importpriser <b>endogent</b> bestemt — en vesentlig forbedring fra eldre versjoner der disse var eksogene."
+  ],
+  question:"Hvor mye løfter (eller demper) en konkret finanspolitisk endring BNP og sysselsetting — og avhenger svaret av hvilket instrument som brukes?",
+  engineTitle:"Samme ECM-motor, fokus på fiskal multiplikator",
+  engineText:"MODAG bruker samme feiljusteringsøkonometri som KVARTS. Det sentrale resultatet er den fiskale multiplikatoren: hvor mye 1 krone økt offentlig etterspørsel løfter BNP, betinget av instrument og pengepolitisk respons.",
+  equations:[
+    {c:"fiskal multiplikator (konseptuelt)", h:"<span class='v2'>m</span> = Δ<span class='v2'>BNP</span> / Δ<span class='v2'>G</span>"},
+    {c:"avhenger av instrument og lukking", h:"<span class='v2'>m</span><sub>off.kjøp</sub> &gt; <span class='v2'>m</span><sub>skattelette</sub>"}
+  ],
+  eqCap:"Offentlig kjøp gir høyere kortsiktig multiplikator enn skattelette, fordi en del av skatteletten spares. Eksakte verdier i Rapporter 2017/9.",
+  params:[
+    {s:"α, β", n:"Feiljustering + langsiktselastisiteter", v:"som KVARTS", w:"est", r:"Delt relasjonssett med KVARTS"},
+    {s:"m", n:"Fiskal multiplikator", v:"instrumentavhengig", w:"mod", r:"Modellbestemt resultat, ikke input"},
+    {s:"FX, p_import", n:"Valutakurs / importpriser", v:"endogen (fra 2007)", w:"mod", r:"Bestemmes i modellen, ikke lagt inn"},
+    {s:"τ", n:"Skattesatser", v:"per produkt/sektor", w:"hum", r:"Direkte og indirekte skatt — politikk-knapp"},
+    {s:"G, I", n:"Offentlig forbruk/investering", v:"nivå + sammensetning", w:"hum", r:"Det sentrale finanspolitiske instrumentet"},
+    {s:"Tr", n:"Overføringer", v:"baner", w:"hum", r:"Trygder, subsidier"},
+    {s:"i", n:"Rente- og valutakursregime", v:"eksogen bane", w:"hum", r:"Pengepolitisk lukking påvirker multiplikatoren"}
+  ],
+  dataIn:["Nasjonalregnskap (årlig)","Estimerte relasjoner delt med KVARTS","Skatte- og avgiftsstatistikk","Internasjonale forutsetninger"],
+  humanSet:["Skattesatser (direkte/indirekte, per produkt og sektor)","Offentlig forbruk og investering","Overføringer (trygder, subsidier)","Rente- og valutakursregime"],
+  closure:"Som KVARTS: etterspørselsstyrt kort sikt, tilbudsstyrt lang sikt. Den pengepolitiske lukkingen (om renten reagerer eller ikke) er avgjørende for hvor stor multiplikatoren blir.",
+  assumptions:[
+    "24 næringer (19 fastland, 3 offentlige, 2 petroleum + utenriks sjøfart), ~40 produkter.",
+    "Endogen valutakurs og importpris fra 2007-versjonen.",
+    "Lineage: MODIS (1960) → MODAG (1980) → MODAG A (1983, økonometrisk) → moderne (2007).",
+    "Multiplikatoren er en <b>output</b>, ikke en parameter man setter."
+  ],
+  outputs:["Fiskale multiplikatorer per instrument","Makrovirkning av statsbudsjettet","Innspill til Nasjonalbudsjettet","Mellomlange framskrivinger"],
+  fig:{ dataIn:["NR (år)","Delte relasjoner","Skattestatistikk","Intl. forutsetn."],
+        assumptions:["Skattesatser","Off. forbruk/inv.","Overføringer","Rente/FX-regime"],
+        engine:{t:"MODAG",e:"ECM (årlig)\nm=ΔBNP/ΔG"},
+        outputs:["Fiskal multiplikator","Budsjettvirkning","Nasjonalbudsjettet"]},
+  sources:"SSB «MODAG»; Boug & Dyvi (red.) (2008) SØS 111; Boug, Cappelen & Eika (2017) Rapporter 2017/9; Cappelen & Longva (1987). Flagg: multiplikatorverdier er versjons- og horisontavhengige."
+},
+/* ============================= NEMO ============================= */
+{
+  id:"nemo", name:"NEMO", fam:"dsge", famLabel:"DSGE",
+  owner:"Norges Bank", horizon:"Konjunktur (pengepolitikk)", role:"Motoren bak rentebanen",
+  tagline:"Hele økonomien utledet fra optimerende aktører med modellkonsistente forventninger.",
+  governing:"NEMO er den ny-keynesianske DSGE-modellen som ligger bak Norges Banks rentebane. Få, men dype likninger: husholdninger, bedrifter, banker, bolig, olje og utland — bundet sammen av nominelle stivheter som gir pengepolitikken kortsiktig kraft.",
+  what:[
+    "NEMO («Norwegian Economy Model») utleder atferd fra mikroøkonomisk optimering: husholdninger maksimerer nytte, bedrifter maksimerer profitt, og alle danner <b>modellkonsistente (rasjonelle) forventninger</b>. Pengepolitikken virker fordi priser og lønninger er trege (Calvo-stivhet).",
+    "Modellen ofrer detaljrikdom (få sektorer) for teoretisk konsistens — det motsatte av KVARTS. Den brukes til kontrafaktiske rentebaner og er robust mot Lucas-kritikken (atferdsparametre endrer seg når politikken endres)."
+  ],
+  question:"Hvilken rentebane bringer inflasjonen mot målet på en rimelig horisont, med minst mulig svingninger i produksjon og rente?",
+  engineTitle:"Ny-keynesiansk kjerne + optimal pengepolitikk",
+  engineText:"Tre kjernerelasjoner: en dynamisk IS-kurve (Euler-likning for konsum), en ny-keynesiansk Phillips-kurve, og en tapsfunksjon komiteen minimerer for å finne renten.",
+  equations:[
+    {c:"dynamisk IS — Euler-likning for konsum", h:"<span class='v2'>c</span><sub>t</sub> = E<sub>t</sub><span class='v2'>c</span><sub>t+1</sub> − <span class='hl'>σ⁻¹</span>·( <span class='v2'>i</span><sub>t</sub> − E<sub>t</sub>π<sub>t+1</sub> )"},
+    {c:"ny-keynesiansk Phillips-kurve", h:"π<sub>t</sub> = <span class='hl'>β</span>·E<sub>t</sub>π<sub>t+1</sub> + <span class='hl'>κ</span>·<span class='v2'>mc</span><sub>t</sub>"},
+    {c:"tapsfunksjon som minimeres", h:"L<sub>t</sub> = (π<sub>t</sub>−<span class='hl'>π*</span>)² + <span class='hl'>λ</span>·<span class='v2'>ŷ</span><sub>t</sub>² + <span class='hl'>ν</span>·(Δ<span class='v2'>i</span><sub>t</sub>)²"}
+  ],
+  eqCap:"E_t = modellkonsistent forventning. Tapsfunksjonen er en regel + skjønn: komiteen veier inflasjonsavvik mot produksjonsgap og rentegliding.",
+  params:[
+    {s:"β", n:"Diskonteringsfaktor", v:"≈ 0,999", w:"kal", r:"Hvor mye framtiden vektes (kvartal)"},
+    {s:"π*", n:"Inflasjonsmål", v:"2,0 %", w:"hum", r:"Målet i tapsfunksjonen"},
+    {s:"σ", n:"Intertemporal substitusjon", v:"≈ 1,0–1,5", w:"kalest", r:"Konsumets rentefølsomhet (Euler)"},
+    {s:"θ", n:"Calvo-prisstivhet", v:"≈ 0,75", w:"est", r:"Andel priser som holdes faste per kvartal"},
+    {s:"κ", n:"Phillips-kurvens helning", v:"liten, positiv", w:"est", r:"Hvor sterkt marginalkostnad driver inflasjon"},
+    {s:"λ", n:"Vekt på produksjonsgap", v:"≈ 0,3–0,5", w:"hum", r:"Hvor mye realøkonomien vektes mot inflasjon"},
+    {s:"ν", n:"Rentegliding", v:"liten", w:"hum", r:"Straff for brå renteendringer"},
+    {s:"h", n:"Vanedannelse (konsum)", v:"kalibrert", w:"kal", r:"Treghet i konsumet"},
+    {s:"—", n:"Armington-elastisitet", v:"kalibrert", w:"kal", r:"Substitusjon import vs. innenlandsk"},
+    {s:"LTV", n:"Pant/belåningsgrad", v:"kalibrert", w:"kal", r:"Boligkanalen og kredittfriksjon"}
+  ],
+  dataIn:["Norske kvartalsdata fra ~2001 (inflasjonsmål)","Prior-fordelinger på dype parametre","FPAS-database (NBs prognosesystem)"],
+  humanSet:["Korttidsanslag for de 2 første kvartalene (NEMO betinges på disse)","Eksogene drivkrefter: olje/gass, internasjonal økonomi, petroleumsinvestering","Skjønn — komiteens vurdering legges på toppen av modellbanen"],
+  closure:"Pengepolitisk regel via tapsfunksjonen: renten settes for å minimere veid sum av inflasjonsavvik, produksjonsgap og rentegliding. Modellen lukkes av rasjonelle forventninger som binder nåtid til forventet framtid.",
+  assumptions:[
+    "Mikrofundering: all atferd fra optimering.",
+    "<b>Modellkonsistente forventninger</b> (rasjonelle).",
+    "Nominelle stivheter (Calvo-priser, treg lønn) gir pengepolitikk kortsiktig effekt.",
+    "Bayesiansk estimering: priors møter data → posteriors.",
+    "Robust mot Lucas-kritikken — derfor DSGE og ikke makroøkonometri."
+  ],
+  outputs:["Rentebane (rentebanen i PPR)","Inflasjons- og produksjonsgap-prognose","Transmisjonsanalyse","Pengepolitisk rapport 4×/år"],
+  fig:{ dataIn:["Kvartalsdata ’01–","Priors","FPAS-database"],
+        assumptions:["Korttidsanslag","Olje/intl. drivkrefter","Skjønn (komité)","π*, λ, ν"],
+        engine:{t:"NEMO",e:"IS: c=Ec−σ⁻¹(i−Eπ)\nPhillips: π=βEπ+κmc\nmin L"},
+        outputs:["Rentebane","Inflasjonsgap","Produksjonsgap","PPR"]},
+  sources:"Brubakk mfl. «Finding NEMO» (Staff Memo 6/2006); Gerdrup, Kravik, Paulsen & Robstad «Documentation of NEMO» (Staff Memo 8/2017); Kravik mfl. (2019); Kravik & Mimir «Navigating with NEMO» (SM 5/2019); Norges Bank Memo 1/2022. Flagg: kalibreringsverdier er typiske for klassen."
+},
+/* ============================= NORA ============================= */
+{
+  id:"nora", name:"NORA", fam:"dsge", famLabel:"DSGE",
+  owner:"Finansdepartementet (utviklet) · SSB (drift fra 2019)", horizon:"Konjunktur (finanspolitikk)", role:"Finanspolitikkens egen DSGE",
+  tagline:"En DSGE bevisst modifisert bort fra lærebok-DSGE for å fange norske særtrekk.",
+  governing:"NORA er Finansdepartementets DSGE for finanspolitisk analyse, tilpasset norsk institusjonell virkelighet: frontfagsmodellen, SPU og handlingsregelen, et detaljert skattesystem, og husholdninger som ikke alle er ricardianske.",
+  what:[
+    "Der NEMO svarer på pengepolitikk, svarer NORA på <b>finanspolitikk</b>. Den deler DSGE-rammeverket, men er skreddersydd med fire norske tilpasninger som gjør at finanspolitiske svar blir realistiske.",
+    "Signaturresultatet er at den fiskale multiplikatoren er <b>tilstandsavhengig</b>: høyere i nedgangskonjunktur, fordi lønnsrigiditeter og nedre rentegrense (ZLB) hindrer at finanspolitikk «trenges ut» av renteoppgang."
+  ],
+  question:"Når virker finanspolitikken sterkest, og hvilket instrument gir mest igjen — avhengig av konjunkturtilstand og pengepolitisk respons?",
+  engineTitle:"DSGE med fire norske tilpasninger",
+  engineText:"NORA legger til forhandlet lønn (frontfag), SPU + handlingsregelens budsjettbeskrankning, et detaljert skattesystem, og to husholdningstyper (kredittilgang vs. «rule-of-thumb») som demper ricardiansk ekvivalens.",
+  equations:[
+    {c:"to husholdningstyper bryter ricardiansk ekvivalens", h:"<span class='v2'>C</span><sub>t</sub> = <span class='hl'>(1−ω)</span>·<span class='v2'>C</span><sup>ric</sup><sub>t</sub> + <span class='hl'>ω</span>·<span class='v2'>C</span><sup>rot</sup><sub>t</sub>"},
+    {c:"budsjettbeskrankning med SPU / handlingsregel", h:"<span class='v2'>G</span><sub>t</sub> = <span class='v2'>T</span><sub>t</sub> + <span class='hl'>0,03</span>·<span class='v2'>SPU</span><sub>t</sub>"},
+    {c:"tilstandsavhengig multiplikator", h:"<span class='v2'>m</span>(nedgang, ZLB) &gt; <span class='v2'>m</span>(oppgang)"}
+  ],
+  eqCap:"ω = andel «rule-of-thumb»-husholdninger (bruker hele inntekten, sparer ikke). Jo høyere ω, desto sterkere finanspolitisk multiplikator.",
+  params:[
+    {s:"ω", n:"Andel rule-of-thumb-husholdninger", v:"kalibrert", w:"kal", r:"Demper ricardiansk ekvivalens; løfter multiplikator"},
+    {s:"0,03", n:"Handlingsregelens uttakssats", v:"3 % av SPU", w:"hum", r:"Budsjettbeskrankningens ankerpunkt"},
+    {s:"β, σ, θ", n:"DSGE-dypparametre", v:"som NEMO-klassen", w:"kalest", r:"Diskontering, substitusjon, prisstivhet"},
+    {s:"—", n:"Forhandlet lønn (frontfag)", v:"kalibrert", w:"kal", r:"Institusjonell lønnsdannelse, ikke markedsklarering"},
+    {s:"τ-sett", n:"Detaljert skattesystem", v:"flere skattearter", w:"hum", r:"Finanspolitikk analyseres instrument for instrument"},
+    {s:"Skatteinstrument", n:"Hvilken skatt endres", v:"valg", w:"hum", r:"Politikk-knapp"},
+    {s:"Utgiftsinstrument", n:"Forbruk/investering/overføring", v:"valg", w:"hum", r:"Politikk-knapp"},
+    {s:"Konjunkturtilstand", n:"Opp- eller nedgang", v:"valg", w:"hum", r:"Multiplikatoren er tilstandsavhengig"},
+    {s:"Pengepol. respons", n:"Aktiv rente eller ZLB", v:"valg", w:"hum", r:"Avgjør om finanspolitikk trenges ut"}
+  ],
+  dataIn:["Kvartalsdata 1999K1–2019K4","Kalibrering + bayesiansk estimering","Impulsrespons fra NEMO (matching)"],
+  humanSet:["Skatteinstrument — hvilken skatt endres","Utgiftsinstrument — forbruk/investering/overføring","Konjunkturtilstand — opp eller ned","Pengepolitisk respons — aktiv rente eller nedre grense (ZLB)"],
+  closure:"Finanspolitikken bindes av handlingsregelen (3 % av SPU) over tid. På kort sikt avgjør den pengepolitiske responsen (aktiv eller ZLB) hvor mye av impulsen som når realøkonomien.",
+  assumptions:[
+    "Første versjon (2019) kalibrert til å <b>ligne NEMO</b> via impulsrespons-matching — så de to DSGE-modellene «snakker sammen».",
+    "Frontfagslønn i stedet for ren markedsklarering.",
+    "To husholdningstyper bryter ricardiansk ekvivalens.",
+    "Internasjonale slektninger: svensk SELMA, dansk MAKRO, ESBs NAWM.",
+    "Utviklet i FIN (Magnus Saxegaard), overlevert SSB des. 2019."
+  ],
+  outputs:["Tilstandsavhengige fiskale multiplikatorer","Finanspolitiske scenarioanalyser","NORA-svar i budsjettdokumentene (fra 2021)"],
+  fig:{ dataIn:["Data ’99–’19","Bayesiansk est.","NEMO-matching"],
+        assumptions:["Skatteinstrument","Utgiftsinstrument","Konjunkturtilstand","Rente / ZLB"],
+        engine:{t:"NORA",e:"C=(1−ω)Cᵣ+ωC_rot\nG=T+0,03·SPU\nm tilstandsavh."},
+        outputs:["Fiskal multiplikator","Scenarioer","Budsjettsvar"]},
+  sources:"Aursland, Frankovic, Birol & Saxegaard (2020) «State-dependent fiscal multipliers in NORA», Economic Modelling 93; Finansdepartementets NORA-dokumentasjon (2019). Flagg: dokumenterte multiplikatorbaner i artikkelen."
+},
+/* ============================= SNOW / MSG ============================= */
+{
+  id:"snow", name:"SNOW / MSG", fam:"cge", famLabel:"CGE — generell likevekt",
+  owner:"SSB", horizon:"Tiår → struktur/klima", role:"Generell likevekt for klima, skatt og lang sikt",
+  tagline:"Løser for priser som klarerer alle markeder samtidig — kalibrert mot ett basisår, ikke estimert.",
+  governing:"CGE-modellene beregner et fullstendig sett av priser som får tilbud og etterspørsel til å gå i null i alle markeder samtidig. SNOW (og forløperen MSG) brukes der strukturendring over tiår er poenget: klimapolitikk, grønn omstilling, skattereform.",
+  what:[
+    "SNOW («Statistics Norway's World model») beskriver bedrifter og husholdninger med <b>CES-funksjoner</b> (konstant substitusjonselastisitet), handel med Armington (import ≠ innenlandsk vare) og CET på eksportsiden. EU ETS-kvotemarkedet er modellert eksplisitt.",
+    "I motsetning til de økonometriske modellene <b>estimeres ikke</b> SNOW på tidsserier. Parametrene kalibreres slik at modellen nøyaktig reproduserer basisårets kryssløpstabell (2018), og elastisitetene hentes fra litteratur/ekspertskjønn.",
+    "MSG-linjen er historisk tung: Leif Johansens MSG fra 1960 regnes som <b>verdens første numeriske CGE-modell</b>."
+  ],
+  question:"Hvordan omstrukturerer økonomien seg over tiår når man legger på en karbonpris, endrer skatter eller innfører ny teknologi — og hva koster det i BNP og utslipp?",
+  engineTitle:"CES-nøstet produksjon i generell likevekt",
+  engineText:"Produksjon og nytte beskrives av CES-funksjoner. Likevekt krever at tilbud = etterspørsel i alle markeder samtidig. Klimapolitikk legges på som en kile i prisene.",
+  equations:[
+    {c:"CES — substitusjon mellom innsatsfaktorer", h:"<span class='v2'>Q</span> = A·[ <span class='hl'>δ</span>·<span class='v2'>K</span><sup>ρ</sup> + (1−<span class='hl'>δ</span>)·<span class='v2'>L</span><sup>ρ</sup> ]<sup>1/ρ</sup>,&nbsp; <span class='hl'>σ</span> = 1/(1−ρ)"},
+    {c:"likevekt: tilbud = etterspørsel i ALLE markeder", h:"Σ <span class='v2'>tilbud</span><sub>i</sub>(<span class='v2'>p</span>) = Σ <span class='v2'>ettersp.</span><sub>i</sub>(<span class='v2'>p</span>) &nbsp; ∀ i"},
+    {c:"klimapolitikk som kile", h:"<span class='v2'>p</span><sub>karbon</sub> = <span class='hl'>τ</span><sub>CO₂</sub> + <span class='hl'>p</span><sub>ETS</sub>"}
+  ],
+  eqCap:"σ = substitusjonselastisitet (fra empiri/ekspert), τ = karbonavgift, δ = faktorandeler (kalibrert mot basisår 2018). Løses i GAMS/MPSGE.",
+  params:[
+    {s:"σ", n:"Substitusjonselastisiteter", v:"litteratur/ekspert", w:"kal", r:"Hvor lett faktorer/varer byttes — driver resultatet sterkt"},
+    {s:"δ", n:"Faktorandeler", v:"kalibrert mot 2018", w:"kal", r:"Velges så modellen reproduserer basisåret"},
+    {s:"τ_CO₂", n:"Karbonavgift", v:"bane (politikk)", w:"hum", r:"Sentralt klimapolitisk instrument"},
+    {s:"p_ETS", n:"EU ETS-kvotepris", v:"eksogen/intl.", w:"hum", r:"Internasjonal ramme"},
+    {s:"A", n:"Total faktorproduktivitet", v:"kalibrert/bane", w:"kal", r:"Skalanivå og teknisk endring"},
+    {s:"—", n:"Armington-elastisitet", v:"kalibrert", w:"kal", r:"Import vs. innenlandsk vare"},
+    {s:"—", n:"CET-elastisitet", v:"kalibrert", w:"kal", r:"Vridning mellom hjemme- og eksportmarked"},
+    {s:"Teknologi", n:"Tilgang/kostnad utslippsfri tek.", v:"forutsetning", w:"hum", r:"Avgjør omstillingskostnaden"}
+  ],
+  dataIn:["Kryssløpstabell, basisår 2018","Utslippsregnskap (6 klimagasser + Gøteborg + svevestøv)","Elastisiteter fra litteratur","Internasjonale rammer (ETS, verdensmarked)"],
+  humanSet:["Karbonpris/avgift — bane for τ_CO₂","Teknologi — tilgang og kostnad på utslippsfri teknologi","Internasjonale rammer — ETS-kvotepris, verdensmarked","Substitusjonselastisiteter — hvor lett faktorer/varer byttes"],
+  closure:"Walrasiansk: alle markeder klareres av fleksible priser samtidig. Faktortilbud (arbeid, kapital) og handelsbalanse lukkes etter valgt regel. Ingen ufrivillig ledighet i grunnversjonen.",
+  assumptions:[
+    "<b>Kalibrering ≠ estimering</b>: parametre velges for å treffe basisåret eksakt.",
+    "Resultatene er <b>følsomme for elastisitetsvalg</b> som ikke er datadrevet.",
+    "Dekker CO₂, CH₄, N₂O, HFK, PFK, SF₆ + NOₓ, SO₂, NH₃, NMVOC + PM10, PM2,5.",
+    "Finnes statisk (SNOW-NO) og rekursivt dynamisk.",
+    "Avløste MSG-6 som FINs vedlikeholdte CGE rundt 2018–2019."
+  ],
+  outputs:["Utslippsbaner under ulik politikk","BNP-/velferdskostnad ved klimatiltak","Klimakur 2030, Perspektivmeldingen","Grønne skatteskift"],
+  fig:{ dataIn:["Kryssløp 2018","Utslippsregnskap","Elastisiteter (litt.)","Intl. rammer"],
+        assumptions:["Karbonpris τ","Teknologi","ETS-pris","Substitusjon σ"],
+        engine:{t:"SNOW / MSG",e:"CES: Q=A[δKᵖ+(1−δ)Lᵖ]\nΣtilbud=Σettersp. ∀i"},
+        outputs:["Utslippsbane","BNP-kostnad","Klimakur","Skatteskift"]},
+  sources:"Johansen (1960); Bjerkholt, Førsund & Holmøy (2016) Journal of Policy Modeling; Rosnes, Bye & Fæhn (2019) «SNOW-modellen for Norge», Notater 2019/1; Fæhn mfl. (2020) Rapporter 2020/23 (Klimakur). Flagg: SNOW overtok for MSG-6 ~2018–19 (slutning)."
+},
+/* ============================= DEMEC ============================= */
+{
+  id:"demec", name:"DEMEC", fam:"cge", famLabel:"CGE — bærekraft",
+  owner:"SSB · finansiert av Finansdepartementet", horizon:"Generasjon (~50–100 år)", role:"Demografi møter offentlige finanser",
+  tagline:"Kobler befolkningsaldring til statsfinansenes langsiktige bærekraft.", warn:true,
+  governing:"DEMEC er CGE-modellen bak Perspektivmeldingens spørsmål: holder velferdsstaten når forsørgerbyrden stiger? Den kobler demografi → makroøkonomi → offentlige finanser på generasjonshorisont. Merk: dette er det <b>svakest dokumenterte</b> verktøyet i utvalget.",
+  what:[
+    "DEMEC modellerer hvordan en aldrende befolkning påvirker skattegrunnlag, pensjons- og helseutgifter, og dermed statsfinansenes bærekraft over flere tiår. Den tilhører samme generelle likevekt-familie som MSG/SNOW.",
+    "Den kvantifiserer «finansieringsgapet»: når andelen eldre vokser raskere enn skattegrunnlaget, åpner det et gap mellom utgifter og inntekter ved gjeldende skattenivå."
+  ],
+  question:"Er velferdsstaten finansielt bærekraftig når befolkningen eldes — og hvor stort blir gapet under ulike politikk- og demografivalg?",
+  engineTitle:"Generell likevekt med demografisk drivkraft",
+  engineText:"En CGE-kjerne der den eksogene demografibanen (fra SSBs befolkningsframskriving) driver arbeidstilbud, skattegrunnlag og aldersrelaterte utgifter. SPU og handlingsregelen inngår i finansieringen.",
+  equations:[
+    {c:"bærekraftsbeskrankning (konseptuelt)", h:"<span class='v2'>Utgifter</span>(<span class='hl'>demografi</span>) ≤ <span class='v2'>Skatt</span> + <span class='hl'>0,03</span>·<span class='v2'>SPU</span>"},
+    {c:"forsørgerbyrde driver utgiftene", h:"<span class='v2'>U</span><sub>pensjon+helse</sub> ∝ <span class='hl'>eldre / yrkesaktive</span>"}
+  ],
+  eqCap:"Når brøken eldre/yrkesaktive stiger raskere enn skattegrunnlaget, vokser et finansieringsgap som modellen tallfester under ulike politikkvalg.",
+  params:[
+    {s:"demografibane", n:"Befolkningsframskriving", v:"middelalternativ", w:"hum", r:"Eksogen ramme fra SSB"},
+    {s:"l(alder)", n:"Arbeidstilbud / yrkesdeltakelse", v:"per aldersgruppe", w:"hum", r:"Bestemmer skattegrunnlaget"},
+    {s:"g_velferd", n:"Velferdsstandard", v:"vekst per bruker", w:"hum", r:"Vekst i offentlige tjenester per innbygger"},
+    {s:"0,03", n:"SPU-avkastning / handlingsregel", v:"3 %", w:"hum", r:"Finansieringskilde"},
+    {s:"σ, δ", n:"CGE-elastisiteter/andeler", v:"kalibrert", w:"kal", r:"Som MSG/SNOW-familien"}
+  ],
+  dataIn:["SSBs befolkningsframskriving","Nasjonalregnskap (makromodul oppdatert til 2020-NR i 2023)","Aldersfordelte utgifts- og inntektsprofiler","Sysselsetting fra MOSART (kobling)"],
+  humanSet:["Demografibane — fruktbarhet, levealder, innvandring","Arbeidstilbud og yrkesdeltakelse per aldersgruppe","Velferdsstandard — vekst i offentlige tjenester per bruker","SPU-avkastning og handlingsregel"],
+  closure:"Langsiktig generell likevekt med en offentlig budsjettbeskrankning. Finansieringsgapet beregnes som det som kreves (f.eks. i skatt) for å balansere budsjettet over horisonten.",
+  assumptions:[
+    "Demografibanen er <b>eksogen</b> (settes utenfra, ikke modellert internt).",
+    "Mottar demografi/sysselsetting fra MOSART nedenfra.",
+    "<b>Dokumentasjonsgap</b>: ingen frittstående teknisk rapport — spredt over Holmøy & Strøm (2013) og notater.",
+    "Ledet av Erling Holmøy; brukt i Perspektivmeldingen 2017 og 2024."
+  ],
+  outputs:["Finansieringsgap over horisonten","Bærekraftsindikatorer","Perspektivmeldingen 2017 & 2024","Politikkscenarioer (skatt, arbeidstilbud)"],
+  fig:{ dataIn:["Befolknings­framskriving","NR (2020)","Alders­profiler","MOSART→sysselsetting"],
+        assumptions:["Demografibane","Arbeidstilbud","Velferdsstandard","SPU 3 %"],
+        engine:{t:"DEMEC",e:"Utg.(demografi) ≤\nSkatt + 0,03·SPU"},
+        outputs:["Finansieringsgap","Bærekraft","Perspektiv­meldingen"]},
+  sources:"SSB «Fiscal policy and population ageing (DEMEC)»; Holmøy & Strøm (2013) i Handbook of CGE Modeling; Perspektivmeldingen 2017 (Meld. St. 29) og 2024. Flagg: svakest dokumenterte modell — mye informasjon er sekundær."
+},
+/* ============================= MOSART ============================= */
+{
+  id:"mosart", name:"MOSART", fam:"micro", famLabel:"Mikrosimulering (dynamisk)",
+  owner:"SSB", horizon:"Livsløp → generasjon", role:"Hele befolkningens livsløp, individ for individ",
+  tagline:"Forlater representativ-agent-tankegangen helt: simulerer hver enkelt persons livsløp framover.",
+  governing:"MOSART tar administrative data for hver enkelt person og simulerer livsløpet framover — utdanning, arbeid, fødsler, død, pensjon. Summen over alle individer gir nasjonale framskrivinger. Det er slik Norge framskriver pensjonsutgiftene.",
+  what:[
+    "MOSART («MOdell for Skolegang, ARbeidstilbud og Trygd») er en dynamisk mikrosimuleringsmodell. For hvert individ, hvert år, trekkes hendelser ut fra <b>estimerte overgangssannsynligheter</b> som avhenger av kjønn, alder, utdanning, yrkesstatus m.m.",
+    "Akkumulert over hele befolkningen (ikke et utvalg) gir dette makrostørrelser som pensjonsutgifter — bygget <em>nedenfra og opp</em>. Kildekoden i C# er en del av dokumentasjonen."
+  ],
+  question:"Hvor store blir pensjons- og trygdeutgiftene framover, og hvordan slår en endring i pensjonsregelverket ut for ulike grupper?",
+  engineTitle:"Overgangssannsynligheter + Monte Carlo",
+  engineText:"Hvert individ er en tilstand som oppdateres år for år ved sannsynlighetstrekninger. Makrotall er summen over alle individer.",
+  equations:[
+    {c:"hendelse h for individ i i år t", h:"P( <span class='v2'>h</span><sub>i,t</sub> = 1 ) = f( <span class='hl'>alder</span>, <span class='hl'>kjønn</span>, <span class='hl'>utdanning</span>, <span class='hl'>yrkesstatus</span>, … )"},
+    {c:"Monte Carlo → individets nye tilstand", h:"<span class='v2'>tilstand</span><sub>i,t+1</sub> = g( <span class='v2'>tilstand</span><sub>i,t</sub>, trukne hendelser )"},
+    {c:"makrostørrelse = sum over alle individer", h:"<span class='v2'>Pensjonsutgift</span><sub>t</sub> = Σ<sub>i</sub> <span class='v2'>pensjon</span><sub>i,t</sub>"}
+  ],
+  eqCap:"Overgangssannsynlighetene estimeres på historiske registerdata; demografirammen er SSBs befolkningsframskriving (middelalternativ).",
+  params:[
+    {s:"P(hendelse)", n:"Overgangssannsynligheter", v:"estimert på register", w:"est", r:"Sannsynlighet for utdanning, jobb, uføre, fødsel, død"},
+    {s:"f(·)", n:"Kovariater", v:"alder, kjønn, utd., yrke", w:"est", r:"Hva sannsynlighetene avhenger av"},
+    {s:"Pensjonsregelverk", n:"Aldersgrenser, opptjening, regulering", v:"forutsetning", w:"hum", r:"Policy-knapp — kan endres og simuleres"},
+    {s:"Demografialt.", n:"Fruktbarhet, levealder, innvandring", v:"valg av alternativ", w:"hum", r:"Demografisk ramme"},
+    {s:"Arbeidstilbud", n:"Yrkesdeltakelsesbaner", v:"forutsetning", w:"hum", r:"Påvirker opptjening og skattegrunnlag"}
+  ],
+  dataIn:["Administrative registre for hele befolkningen (ikke utvalg)","Utdanning, inntekt, trygd, sysselsetting, familie","SSBs befolkningsframskriving som demografisk ramme"],
+  humanSet:["Pensjonsregelverk — aldersgrenser, opptjening, regulering","Demografialternativ — fruktbarhet, levealder, innvandring","Arbeidstilbudsbaner"],
+  closure:"Ingen markedslukking i makroøkonomisk forstand — modellen er regnskapsmessig: den aggregerer individuelle utfall til nasjonale baner. Demografi og regelverk er eksogene.",
+  assumptions:[
+    "<b>Ingen representativ agent</b> — hver person simuleres.",
+    "Overgangssannsynligheter antas stabile (estimert på historikk).",
+    "Hele befolkningen, ikke et utvalg.",
+    "Leverer demografi/sysselsetting videre til DEMEC.",
+    "Versjon 7.5 dokumentert i 2025; kildekode i C#."
+  ],
+  outputs:["Pensjonsutgifter og pensjonsformue framover","Pensjonsutvalget (NOU 2022:7)","Dynamisk justering av aldersgrenser (Rapporter 2022/22)","Opptjente pensjonsrettigheter til Eurostat"],
+  fig:{ dataIn:["Registre (hele bef.)","Utd./inntekt/trygd","Befolknings­framskriving"],
+        assumptions:["Pensjonsregelverk","Demografialternativ","Arbeidstilbud"],
+        engine:{t:"MOSART",e:"P(h)=f(alder,kjønn…)\nΣᵢ pensjonᵢ"},
+        outputs:["Pensjonsutgift","Pensjonsformue","NOU 2022:7","→ DEMEC"]},
+  sources:"Fredriksen & Knudsen «MOSART 7.5 Teknisk dokumentasjon» (SSB Notater 2025/04); forrige versjon 5.7 (2015); NOU 2022:7 (Pensjonsutvalget); SSB Rapporter 2022/22. Godt dokumentert — egen teknisk rapport + kildekode."
+},
+/* ============================= LOTTE ============================= */
+{
+  id:"lotte", name:"LOTTE", fam:"micro", famLabel:"Mikrosimulering (statisk)",
+  owner:"SSB · Finansdepartementet (oppdragsgiver)", horizon:"Budsjettår", role:"Skattesystemet på et befolkningsutvalg",
+  tagline:"Svarer på det konkrete budsjettspørsmålet: hva koster en skatteendring, og hvem treffer den?",
+  governing:"LOTTE kjører gjeldende og foreslått skattelovverk på mikrodata for hver enkelt skattyter i et representativt utvalg. Det er verktøyet som tallfester proveny og fordelingsvirkning av ethvert skatteforslag i statsbudsjettet.",
+  what:[
+    "LOTTE er et system av statiske mikrosimuleringsmodeller. «Statisk» betyr at det i hovedmodulen ikke regnes inn atferdsendringer — det beregner direkte hva en skatteendring gjør med provenyet og med fordelingen mellom inntektsgrupper.",
+    "Systemet har tre hovedmoduler: <b>LOTTE-Skatt</b> (direkte personskatt, ingen atferd), <b>LOTTE-Konsum</b> (indirekte skatter, ingen atferd) og <b>LOTTE-Arbeid</b> (arbeidstilbudseffekter — med atferd)."
+  ],
+  question:"Hvor mange kroner inn/ut av statskassen gir et skatteforslag, og hvordan fordeler virkningen seg på inntektsdesilene?",
+  engineTitle:"Skattelovverket regnet skattyter for skattyter",
+  engineText:"For hver person i utvalget beregnes skatt under gjeldende og foreslått regelverk. Differansen, summert opp og vektet, gir proveny og fordelingsprofil.",
+  equations:[
+    {c:"provenyvirkning = sum over utvalget", h:"Δ<span class='v2'>Proveny</span> = Σ<sub>i</sub> w<sub>i</sub>·[ <span class='v2'>skatt</span><sup>ny</sup><sub>i</sub> − <span class='v2'>skatt</span><sup>gml</sup><sub>i</sub> ]"},
+    {c:"fordeling = virkning per inntektsdesil", h:"Δ<span class='v2'>dispinnt.</span><sub>desil d</sub> = f( regelendring )"},
+    {c:"kun LOTTE-Arbeid: atferdsrespons", h:"Δ<span class='v2'>arbeidstilbud</span> = <span class='hl'>ε</span>·Δ(1−marginalskatt)"}
+  ],
+  eqCap:"w_i = utvalgsvekt. ε = arbeidstilbudselastisitet (kun i LOTTE-Arbeid). Hovedmodulene er statiske: ingen atferdsendring.",
+  params:[
+    {s:"satser, grenser", n:"Skattesatser og -grenser", v:"gjeldende/forslag", w:"hum", r:"Trinnskatt, formuesskatt, fradrag, bunnfradrag"},
+    {s:"mva, særavg.", n:"Indirekte satser", v:"gjeldende/forslag", w:"hum", r:"LOTTE-Konsum"},
+    {s:"ε", n:"Arbeidstilbudselastisitet", v:"skjønn/empiri", w:"hum", r:"Kun LOTTE-Arbeid; atferdsrespons på skatt"},
+    {s:"w_i", n:"Utvalgsvekter", v:"fra 10 %-utvalg", w:"est", r:"Oppblåsing til hele befolkningen"},
+    {s:"framskr.faktor", n:"Lønns-/prisvekst til budsjettår", v:"forutsetning", w:"hum", r:"Grunnlagsår ligger ~3 år tilbake"}
+  ],
+  dataIn:["10 % representativt utvalg av befolkningen","Inntekts- og formuesstatistikk per individ/husholdning","Oppdateres hver høst; grunnlagsår ~3 år tilbake","Framskrives til budsjettåret"],
+  humanSet:["Skattesatser og -grenser — trinnskatt, formuesskatt, fradrag, bunnfradrag","Indirekte satser — mva, særavgifter (LOTTE-Konsum)","Arbeidstilbudselastisiteter — kun LOTTE-Arbeid","Framskrivingsfaktorer — lønns-/prisvekst til budsjettåret"],
+  closure:"Ingen makrolukking. LOTTE-Skatt og -Konsum er rent regnskapsmessige (statiske). Kun LOTTE-Arbeid har en atferdsmodul som lar arbeidstilbud reagere på marginalskatt.",
+  assumptions:[
+    "<b>Statisk</b>: hovedmodulene antar ingen atferdsendring.",
+    "Representativt 10 %-utvalg, vektet opp.",
+    "Grunnlagsår framskrives med vekst-/justeringsfaktorer.",
+    "Tilleggsmoduler: LOTTE-Barn, LOTTE-Typehushold, LOTTE-Aksess (FINs egen app)."
+  ],
+  outputs:["Provenyanslag — kroner inn/ut av statskassen","Fordelingsprofil per inntektsdesil","Gjennomsnitts- og marginalskatt","Svar på stortingsspørsmål om skatteforslag"],
+  fig:{ dataIn:["10 %-utvalg","Inntekt/formue","Framskr. til budsjettår"],
+        assumptions:["Satser & grenser","Indirekte satser","Elastisitet ε (Arbeid)","Framskr.faktorer"],
+        engine:{t:"LOTTE",e:"ΔProveny=Σ wᵢ(skattᵢⁿʸ−skattᵢ)\nfordeling per desil"},
+        outputs:["Proveny","Fordeling per desil","Marginalskatt"]},
+  sources:"Hansen, Lian, Nesbakken & Thoresen (2008) Rapporter 2008/36; SSB modellsider LOTTE-Skatt/-Konsum; Jia mfl. (2024) Int. Journal of Microsimulation. Godt dokumentert; første LOTTE-Skatt tidlig på 1970-tallet."
+},
+/* ============================= NAM ============================= */
+{
+  id:"nam", name:"NAM", fam:"econ", famLabel:"Makroøkonometrisk (akademisk)",
+  owner:"Akademisk (Bårdsen / Nymoen)", horizon:"Konjunktur", role:"Akademisk referansemodell · tilsyn (NAM-FS)",
+  tagline:"Akademisk søstermodell til KVARTS — deler datafundament, brukt i tilsynssammenheng.",
+  governing:"NAM («Norwegian Aggregate Model») er ikke en myndighetsmodell, men en akademisk makroøkonometrisk modell i samme tradisjon som KVARTS. Den er tatt med fordi den deler datafundament og brukes som referanse og i analyser av finansiell stabilitet (NAM-FS).",
+  what:[
+    "NAM er bygget på den kointegrerte VAR-/feiljusteringstradisjonen som er beskrevet i lærebokverket «The Econometrics of Macroeconomic Modelling» (Bårdsen mfl., OUP 2005).",
+    "Den er mer aggregert og transparent enn KVARTS, og fungerer som et akademisk testlaboratorium for samme type relasjoner — lønn, pris, rente, kreditt — som myndighetsmodellene bruker."
+  ],
+  question:"Holder de empiriske sammenhengene i norsk makroøkonomi (lønn, pris, rente) ved nærmere akademisk gransking — og hva sier de om finansiell stabilitet?",
+  engineTitle:"Kointegrert VAR + feiljustering",
+  engineText:"Samme grunnmotor som KVARTS/MODAG: langsiktige likevektsrelasjoner og kortsiktig feiljustering, men i et mer aggregert og gjennomsiktig system.",
+  equations:[
+    {c:"kointegrert system (skjematisk)", h:"Δ<span class='v2'>x</span><sub>t</sub> = Γ·Δ<span class='v2'>x</span><sub>t−1</sub> − <span class='hl'>α</span>·β'<span class='v2'>x</span><sub>t−1</sub> + ε<sub>t</sub>"}
+  ],
+  eqCap:"β' = langsiktige kointegrasjonsvektorer, α = feiljusteringskoeffisienter. Samme logikk som KVARTS, mer aggregert.",
+  params:[
+    {s:"α", n:"Feiljusteringskoeffisienter", v:"estimert", w:"est", r:"Tilbakevending til likevekt"},
+    {s:"β'", n:"Kointegrasjonsvektorer", v:"estimert", w:"est", r:"Langsiktige sammenhenger"},
+    {s:"Γ", n:"Kortsiktsdynamikk", v:"estimert", w:"est", r:"Treghet og samvariasjon"},
+    {s:"i, p*", n:"Eksogene forutsetninger", v:"baner", w:"hum", r:"Rente, internasjonale forhold"}
+  ],
+  dataIn:["Norske makro-tidsserier (delt fundament med KVARTS)","Lønn, pris, rente, kreditt, bolig"],
+  humanSet:["Eksogene baner: rente, internasjonale forhold","Scenariovalg for tilsynsanalyser (NAM-FS)"],
+  closure:"Som de øvrige makroøkonometriske: etterspørsel kort sikt, tilbud lang sikt. Brukes akademisk og i stresstesting av finansiell stabilitet.",
+  assumptions:[
+    "Akademisk, ikke en myndighetsmodell.",
+    "Deler datafundament med myndighetsmodellene.",
+    "Enkeltvis/systemvis estimering i kointegrert ramme.",
+    "NAM-FS-varianten brukes i finansiell stabilitet."
+  ],
+  outputs:["Akademiske prognoser og analyser","Finansiell stabilitet (NAM-FS)","Referanse/kryss-sjekk mot myndighetsmodeller"],
+  fig:{ dataIn:["Makro-tidsserier","Lønn/pris/rente/kreditt"],
+        assumptions:["Rentebane","Intl. forhold","Tilsynsscenarioer"],
+        engine:{t:"NAM",e:"Δx=ΓΔx−αβ'x+ε\nkointegrert VAR"},
+        outputs:["Prognose","NAM-FS (stabilitet)","Kryss-sjekk"]},
+  sources:"Bårdsen, Eitrheim, Jansen & Nymoen (2005) «The Econometrics of Macroeconomic Modelling», OUP; Normetrics (NAM/NAM-FS). Akademisk modell, ikke myndighetsmodell."
+}
+];
+
+const FAMS = {econ:"b-econ", dsge:"b-dsge", cge:"b-cge", micro:"b-micro"};
+const WHO = {est:["est","estimert"], kal:["kal","kalibrert"], kalest:["kalest","kalib./est."], hum:["hum","◣ mennesket"], mod:["mod","modellbestemt"]};
+
+/* ---- figure generator: data inn → forutsetninger → motor → resultat ---- */
+function buildFigure(m){
+  const f=m.fig;
+  const famColor={econ:"#3a4a8c",dsge:"#1f6f6b",cge:"#9a7b1f",micro:"#c0552b"}[m.fam];
+  const famSoft={econ:"#e6e9f5",dsge:"#e2efee",cge:"#f2ecdb",micro:"#f6e7df"}[m.fam];
+  const rows=Math.max(f.dataIn.length, f.assumptions.length, f.outputs.length, 1);
+  const boxH=30, gap=9, topPad=50, botPad=18;
+  const bodyH=rows*(boxH+gap)-gap;
+  const H=topPad+bodyH+botPad;
+  const W=1000;
+  const cols=[
+    {x:14,  w:188, items:f.dataIn,      fill:"#eef1f6", stroke:"#d4dae3", tcol:"#13233a", head:"DATA INN", hcol:"#5d6b80"},
+    {x:248, w:188, items:f.assumptions, fill:"#f6e7df", stroke:"#ecd3c7", tcol:"#7a3a20", head:"◣ FORUTSETNINGER", hcol:"#c0552b"},
+    {x:778, w:208, items:f.outputs,     fill:"#ffffff", stroke:"#d4dae3", tcol:"#13233a", head:"RESULTAT", hcol:"#5d6b80"}
+  ];
+  let svg=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Figur: forutsetninger og parametre i ${m.name}">`;
+  svg+=`<defs><marker id="ar-${m.id}" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#8a97a8"/></marker></defs>`;
+  // column headers
+  cols.forEach(c=>{ svg+=`<text x="${c.x+c.w/2}" y="30" text-anchor="middle" font-family="Consolas,monospace" font-size="11" font-weight="700" fill="${c.hcol}" letter-spacing="0.5">${c.head}</text>`; });
+  svg+=`<text x="635" y="30" text-anchor="middle" font-family="Consolas,monospace" font-size="11" font-weight="700" fill="${famColor}" letter-spacing="0.5">MODELLMOTOR</text>`;
+  // column boxes
+  cols.forEach(c=>{
+    const n=c.items.length, colH=n*(boxH+gap)-gap, startY=topPad+(bodyH-colH)/2;
+    c.items.forEach((it,i)=>{
+      const y=startY+i*(boxH+gap);
+      svg+=`<rect x="${c.x}" y="${y}" width="${c.w}" height="${boxH}" rx="4" fill="${c.fill}" stroke="${c.stroke}"/>`;
+      svg+=`<text x="${c.x+c.w/2}" y="${y+boxH/2+4}" text-anchor="middle" font-family="-apple-system,Segoe UI,sans-serif" font-size="11" fill="${c.tcol}">${escapeXml(it)}</text>`;
+    });
+  });
+  // engine box (center)
+  const eX=470, eW=330, eH=Math.min(bodyH,150), eY=topPad+(bodyH-eH)/2;
+  svg+=`<rect x="${eX}" y="${eY}" width="${eW}" height="${eH}" rx="6" fill="${famSoft}" stroke="${famColor}" stroke-width="1.8"/>`;
+  svg+=`<text x="${eX+eW/2}" y="${eY+26}" text-anchor="middle" font-family="Georgia,serif" font-size="16" font-weight="700" fill="${famColor}">${escapeXml(f.engine.t)}</text>`;
+  const eqLines=f.engine.e.split("\n");
+  eqLines.forEach((ln,i)=>{ svg+=`<text x="${eX+eW/2}" y="${eY+48+i*17}" text-anchor="middle" font-family="Consolas,monospace" font-size="11" fill="#13233a">${escapeXml(ln)}</text>`; });
+  svg+=`<text x="${eX+eW/2}" y="${eY+eH-10}" text-anchor="middle" font-family="Consolas,monospace" font-size="9.5" fill="${famColor}" font-style="italic">${m.famLabel}</text>`;
+  // arrows: data->engine, assumptions->engine, engine->outputs
+  const midY=topPad+bodyH/2;
+  svg+=`<path d="M202,${midY} C230,${midY} 240,${midY} 248,${midY}" stroke="#8a97a8" stroke-width="1.4" fill="none"/>`;
+  svg+=`<path d="M436,${midY} C452,${midY} 458,${midY} ${eX-2},${midY}" stroke="#8a97a8" stroke-width="1.6" fill="none" marker-end="url(#ar-${m.id})"/>`;
+  svg+=`<path d="M${eX+eW},${midY} C${eX+eW+20},${midY} ${eX+eW+30},${midY} 778,${midY}" stroke="#8a97a8" stroke-width="1.6" fill="none" marker-end="url(#ar-${m.id})"/>`;
+  svg+=`</svg>`;
+  return svg;
+}
+function escapeXml(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+
+/* ---- render a model panel ---- */
+function renderModel(idx){
+  const m=MODELS[idx];
+  const eqHtml=m.equations.map(e=>`<span class="c">// ${e.c}</span><br>${e.h}`).join("<br><br>");
+  const paramRows=m.params.map(p=>{const w=WHO[p.w]||["mod",p.w];return `<tr><td class="sym">${p.s}</td><td><b style="color:var(--ink)">${p.n}</b></td><td class="val">${p.v}</td><td><span class="who ${w[0]}">${w[1]}</span></td><td>${p.r}</td></tr>`;}).join("");
+  const dataLi=m.dataIn.map(x=>`<li>${x}</li>`).join("");
+  const humanLi=m.humanSet.map(x=>`<li><span class="inject"></span>${x}</li>`).join("");
+  const assumLi=m.assumptions.map(x=>`<li>${x}</li>`).join("");
+  const outLi=m.outputs.map(x=>`<li>${x}</li>`).join("");
+  const whatHtml=m.what.map(p=>`<p>${p}</p>`).join("");
+
+  const p=document.getElementById('panel');
+  p.className='panel-wrap '+m.fam;
+  p.innerHTML=`
+    <div class="eyebrow ${m.fam==='micro'?'':''}">${m.owner} · ${m.role} <span class="badge ${FAMS[m.fam]}" style="margin-left:6px">${m.famLabel}</span> ${m.warn?'<span class="badge" style="background:#f6e0e0;color:#b23b3b;margin-left:4px">Svakest dokumentert</span>':''}</div>
+    <h2>${m.name} — ${m.tagline}</h2>
+    <div class="meta-row"><span><b>Eier:</b> ${m.owner}</span><span><b>Horisont:</b> ${m.horizon}</span><span><b>Familie:</b> ${m.famLabel}</span></div>
+    <div class="governing">${m.governing}</div>
+
+    <div class="grid2">
+      <div>
+        <h3>Hva modellen er</h3>
+        ${whatHtml}
+        <div class="box accent" style="margin-top:6px">
+          <h4>Spørsmålet den svarer på</h4>
+          <p style="margin:0;font-size:14px;color:var(--ink)">${m.question}</p>
+        </div>
+      </div>
+      <div>
+        <h3>${m.engineTitle}</h3>
+        <p style="font-size:14px">${m.engineText}</p>
+        <div class="eq">${eqHtml}</div>
+        <div class="eq-cap">${m.eqCap}</div>
+      </div>
+    </div>
+
+    <hr class="rule">
+
+    <h3>Figur — hvordan data og forutsetninger strømmer gjennom ${m.name}</h3>
+    ${buildFigure(m)}
+    <div class="fig-cap">Grå bokser = data inn · terrakotta = forutsetninger mennesket setter (◣) · farget motor = modellkjernen med nøkkellikning · hvite bokser = resultat.</div>
+
+    <hr class="rule">
+
+    <h3>Alle parametre og hvem som setter dem</h3>
+    <table class="tbl">
+      <thead><tr><th>Symbol</th><th>Parameter</th><th>Verdi</th><th>Hvem setter</th><th>Rolle</th></tr></thead>
+      <tbody>${paramRows}</tbody>
+    </table>
+
+    <div class="grid3" style="margin-top:22px">
+      <div class="box"><h4>Data inn</h4><ul class="tight">${dataLi}</ul></div>
+      <div class="box accent"><h4>Forutsetninger mennesket setter</h4><ul class="tight">${humanLi}</ul></div>
+      <div class="box"><h4>Resultat / output</h4><ul class="tight">${outLi}</ul></div>
+    </div>
+
+    <div class="grid2" style="margin-top:18px">
+      <div class="box"><h4>Sentrale forutsetninger og antakelser</h4><ul class="tight">${assumLi}</ul></div>
+      <div class="box"><h4>Lukking (closure)</h4><p style="font-size:13px;margin:0">${m.closure}</p></div>
+    </div>
+
+    <div class="src"><b>Kilder.</b> ${m.sources}</div>
+  `;
+  // buttons active state
+  document.querySelectorAll('.mbtn').forEach((b,i)=>{
+    b.className='mbtn '+MODELS[i].fam+(i===idx?' active':'');
+  });
+  current=idx;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ---- build buttons ---- */
+let current=0;
+const btnWrap=document.getElementById('btns');
+MODELS.forEach((m,i)=>{
+  const b=document.createElement('button');
+  b.className='mbtn '+m.fam;
+  b.innerHTML=`<span class="fam ${m.fam}"></span>${m.name}`;
+  b.addEventListener('click',()=>renderModel(i));
+  btnWrap.appendChild(b);
+});
+document.getElementById('prevBtn').addEventListener('click',()=>renderModel((current-1+MODELS.length)%MODELS.length));
+document.getElementById('nextBtn').addEventListener('click',()=>renderModel((current+1)%MODELS.length));
+renderModel(0);
+</script>
+</body>
+</html>

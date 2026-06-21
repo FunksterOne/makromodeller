@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kritisk dashbord — «Skapt av ingenting» møter modellapparatet</title>
+<style>
+  :root{
+    --ink:#13233a; --ink-soft:#3d5070; --slate:#5d6b80;
+    --line:#d4dae3; --line-soft:#e7ebf1; --paper:#ffffff;
+    --mist:#f4f6f9; --mist-2:#eef1f6;
+    --accent:#c0552b; --accent-soft:#f6e7df;
+    --teal:#1f6f6b; --teal-soft:#e2efee;     /* DSGE */
+    --gold:#9a7b1f; --gold-soft:#f2ecdb;     /* CGE */
+    --indigo:#3a4a8c; --indigo-soft:#e6e9f5; /* makroøkonometri */
+    --ok:#2f7d4f; --ok-soft:#e2f0e8;
+    --warn:#b8860b; --warn-soft:#f6efd9;
+    --bad:#b23b3b; --bad-soft:#f6e0e0;
+    --mono:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    --serif:Georgia,"Times New Roman",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:var(--sans);color:var(--ink);background:var(--mist-2);line-height:1.55;
+    -webkit-font-smoothing:antialiased;font-size:15px}
+  .wrap{max-width:1180px;margin:0 auto;padding:26px 18px 90px}
+
+  /* ---------- TOPBAR ---------- */
+  .topbar{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.95);
+    backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:0 18px}
+  .topbar-inner{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:16px;
+    height:50px;overflow-x:auto;white-space:nowrap}
+  .topbar a{font-size:12px;color:var(--slate);text-decoration:none;font-weight:500;
+    padding:4px 2px;border-bottom:2px solid transparent}
+  .topbar a:hover{color:var(--ink);border-color:var(--accent)}
+  .topbar .brand{font-family:var(--serif);font-weight:600;color:var(--ink);font-size:14px;
+    padding-right:10px;border-right:1px solid var(--line)}
+
+  /* ---------- PANELS / SLIDES ---------- */
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:3px;
+    margin:0 0 22px;padding:34px 40px 38px;position:relative;box-shadow:0 1px 2px rgba(19,35,58,.04);
+    scroll-margin-top:64px}
+  .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--ink);
+    border-radius:2px 0 0 2px}
+  @media(max-width:720px){.card{padding:24px 20px 28px}}
+
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--accent);font-weight:600;margin-bottom:9px}
+  .eyebrow.neutral{color:var(--slate)}
+  h1{font-family:var(--serif);font-weight:600;font-size:30px;line-height:1.15;letter-spacing:-.01em;margin-bottom:8px}
+  h2{font-family:var(--serif);font-weight:600;font-size:24px;line-height:1.18;letter-spacing:-.01em;margin-bottom:6px}
+  h3{font-family:var(--serif);font-weight:600;font-size:18px;margin:0 0 4px}
+  .sub{font-size:16px;color:var(--ink-soft);max-width:80ch}
+  p{margin:0 0 12px;color:var(--ink-soft)}
+  strong{color:var(--ink);font-weight:600}
+  .governing{font-size:16px;line-height:1.45;color:var(--ink);font-weight:600;
+    border-left:3px solid var(--accent);padding:9px 0 9px 16px;margin:2px 0 24px;
+    background:linear-gradient(90deg,var(--accent-soft),transparent 62%)}
+  .rule{height:1px;background:var(--line);border:0;margin:24px 0}
+  .term{font-family:var(--mono);font-size:.85em;background:var(--mist);border:1px solid var(--line-soft);
+    padding:1px 5px;border-radius:3px;color:var(--ink);white-space:nowrap}
+  .small{font-size:12.5px;color:var(--slate)}
+
+  /* ---------- HERO GAUGE ---------- */
+  .hero-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:28px;align-items:center;margin-top:22px}
+  @media(max-width:820px){.hero-grid{grid-template-columns:1fr}}
+  .verdict-bar{display:flex;height:34px;border-radius:4px;overflow:hidden;border:1px solid var(--line);margin:6px 0 4px}
+  .verdict-bar .seg{display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;
+    font-family:var(--mono);font-size:13px}
+  .seg.ok{background:var(--ok)} .seg.warn{background:var(--warn)} .seg.bad{background:var(--bad)}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin:12px 0 0}
+  .legend span{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--slate)}
+  .legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
+
+  /* ---------- KPI ---------- */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:6px 0}
+  @media(max-width:820px){.kpis{grid-template-columns:1fr 1fr}}
+  .kpi{border:1px solid var(--line);border-radius:3px;padding:14px 16px;background:var(--paper);position:relative}
+  .kpi .v{font-family:var(--serif);font-size:25px;font-weight:600;color:var(--ink);line-height:1.05}
+  .kpi .v small{font-size:13px;color:var(--slate);font-weight:400}
+  .kpi .l{font-size:11.5px;color:var(--slate);margin-top:7px;line-height:1.35}
+  .kpi .chip{position:absolute;top:10px;right:10px}
+
+  .chip{display:inline-block;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.03em;
+    padding:2px 7px;border-radius:20px;text-transform:uppercase;vertical-align:middle}
+  .chip.ok{background:var(--ok-soft);color:var(--ok)}
+  .chip.warn{background:var(--warn-soft);color:var(--warn)}
+  .chip.bad{background:var(--bad-soft);color:var(--bad)}
+
+  /* ---------- model badges ---------- */
+  .mb{display:inline-block;font-family:var(--mono);font-size:10px;font-weight:700;padding:2px 7px;
+    border-radius:3px;margin:2px 4px 2px 0;white-space:nowrap}
+  .mb.econ{background:var(--indigo-soft);color:var(--indigo)}
+  .mb.dsge{background:var(--teal-soft);color:var(--teal)}
+  .mb.cge{background:var(--gold-soft);color:var(--gold)}
+  .mb.micro{background:var(--accent-soft);color:var(--accent)}
+  .mb.fs{background:#ece9f5;color:#5b4b8a}
+
+  /* ---------- FILTER ---------- */
+  .filterbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:4px 0 18px}
+  .fbtn{font-family:var(--mono);font-size:12px;font-weight:600;padding:6px 13px;border-radius:20px;
+    border:1px solid var(--line);background:var(--paper);color:var(--slate);cursor:pointer;transition:.12s}
+  .fbtn:hover{border-color:var(--ink-soft);color:var(--ink)}
+  .fbtn.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .fbtn.ok.active{background:var(--ok);border-color:var(--ok)}
+  .fbtn.warn.active{background:var(--warn);border-color:var(--warn)}
+  .fbtn.bad.active{background:var(--bad);border-color:var(--bad)}
+  .fcount{font-size:12px;color:var(--slate);margin-left:auto;font-family:var(--mono)}
+
+  /* ---------- CLAIM CARDS ---------- */
+  .group-head{display:flex;align-items:baseline;gap:10px;margin:24px 0 12px}
+  .group-head h3{font-size:17px}
+  .group-head .gnum{font-family:var(--mono);font-size:12px;color:var(--accent);font-weight:700}
+  .claim{border:1px solid var(--line);border-left-width:4px;border-radius:4px;background:var(--paper);
+    margin:0 0 12px;overflow:hidden;transition:.12s}
+  .claim.ok{border-left-color:var(--ok)} .claim.warn{border-left-color:var(--warn)} .claim.bad{border-left-color:var(--bad)}
+  .claim-head{display:flex;gap:12px;align-items:flex-start;padding:13px 16px;cursor:pointer;user-select:none}
+  .claim-head:hover{background:var(--mist)}
+  .claim-q{flex:1;font-size:14px;color:var(--ink);font-weight:600;line-height:1.4}
+  .claim-q .src-ref{font-weight:400;color:var(--slate);font-style:italic;font-size:12px}
+  .caret{font-family:var(--mono);color:var(--slate);font-size:13px;transition:transform .15s;margin-top:2px}
+  .claim.open .caret{transform:rotate(90deg)}
+  .claim-body{display:none;padding:2px 16px 16px 16px;border-top:1px solid var(--line-soft)}
+  .claim.open .claim-body{display:block}
+  .ts{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:12px 0}
+  @media(max-width:680px){.ts{grid-template-columns:1fr}}
+  .ts .box{border-radius:4px;padding:11px 13px;font-size:13px;line-height:1.5}
+  .ts .box h5{font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;font-family:var(--mono)}
+  .box.truth{background:var(--ok-soft)} .box.truth h5{color:var(--ok)}
+  .box.prob{background:var(--bad-soft)} .box.prob h5{color:var(--bad)}
+  .box.prob.warnp{background:var(--warn-soft)} .box.prob.warnp h5{color:var(--warn)}
+  .modelrow{background:var(--mist);border:1px dashed var(--line);border-radius:4px;padding:11px 13px;font-size:12.5px}
+  .modelrow h5{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--slate);
+    font-family:var(--mono);margin-bottom:6px}
+  .verdict-line{font-size:12.5px;color:var(--ink-soft);margin-top:10px}
+  .verdict-line b{color:var(--ink)}
+
+  /* ---------- TABLES ---------- */
+  table.tbl{width:100%;border-collapse:collapse;font-size:13px;margin:6px 0}
+  table.tbl th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--slate);
+    font-weight:700;padding:9px 10px;border-bottom:2px solid var(--ink);vertical-align:bottom}
+  table.tbl td{padding:9px 10px;border-bottom:1px solid var(--line-soft);color:var(--ink-soft);vertical-align:top}
+  table.tbl tr:last-child td{border-bottom:0}
+  table.tbl td.num,table.tbl th.num{font-family:var(--mono);text-align:right;white-space:nowrap;color:var(--ink)}
+  table.tbl td.sym{font-family:var(--mono);color:var(--accent);font-weight:600;white-space:nowrap}
+  table.tbl tbody tr:hover{background:var(--mist)}
+  .tbl-cap{font-size:11.5px;color:var(--slate);margin-top:8px;font-style:italic}
+
+  /* ---------- matrix ---------- */
+  .matrix-scroll{overflow-x:auto}
+  table.mx{border-collapse:collapse;font-size:12px;min-width:760px;width:100%}
+  table.mx th{font-family:var(--mono);font-size:10.5px;font-weight:700;color:var(--slate);padding:8px 6px;
+    border-bottom:2px solid var(--ink);text-align:center;vertical-align:bottom}
+  table.mx th.rowh{text-align:left;width:220px}
+  table.mx td{padding:7px 6px;border-bottom:1px solid var(--line-soft);text-align:center;font-size:14px}
+  table.mx td.rowh{text-align:left;font-size:12.5px;color:var(--ink-soft)}
+  table.mx td.rowh b{color:var(--ink)}
+  table.mx tbody tr:hover{background:var(--mist)}
+  .dot{display:inline-block;width:11px;height:11px;border-radius:50%}
+  .dot.p{background:var(--ink)} .dot.s{background:var(--line);border:1px solid var(--slate)}
+
+  /* ---------- callouts ---------- */
+  .flag{background:var(--accent-soft);border:1px solid #ecd3c7;border-radius:4px;padding:12px 15px;
+    font-size:13px;color:#7a3a20;margin:16px 0}
+  .flag b{color:#5e2c18}
+  .flag::before{content:"⚑ ";font-weight:700}
+  .note{background:var(--indigo-soft);border:1px solid #d3d9f0;border-radius:4px;padding:12px 15px;
+    font-size:13px;color:var(--ink-soft);margin:16px 0}
+  .src{font-size:11.5px;color:var(--slate);line-height:1.55;margin-top:16px;padding-top:12px;border-top:1px solid var(--line-soft)}
+  .src b{color:var(--ink-soft)}
+
+  /* mini bar (policy rate) */
+  .ratebars{display:flex;align-items:flex-end;gap:5px;height:90px;margin:10px 0 4px}
+  .ratebars .rb{flex:1;background:var(--indigo);border-radius:2px 2px 0 0;position:relative;min-height:3px}
+  .ratebars .rb.peak{background:var(--indigo)}
+  .ratebars .rb.now{background:var(--accent)}
+  .ratebars .rb.fc{background:repeating-linear-gradient(45deg,#9fb0d6,#9fb0d6 3px,#cdd6ea 3px,#cdd6ea 6px);border:1px solid #9fb0d6}
+  .ratebars .rb.now::after{content:"";position:absolute;left:-3px;right:-3px;bottom:-1px;top:-1px;border:1.5px solid var(--accent);border-radius:2px}
+  .ratebars .rb span{position:absolute;top:-15px;left:50%;transform:translateX(-50%);font-family:var(--mono);
+    font-size:9px;color:var(--slate)}
+  .ratebars-x{display:flex;gap:5px}
+  .ratebars-x div{flex:1;text-align:center;font-family:var(--mono);font-size:9px;color:var(--slate)}
+
+  /* inflasjonsbane */
+  .inflo{position:relative;display:flex;align-items:flex-end;gap:9px;height:96px;margin:16px 0 4px}
+  .inflo .yr{flex:1;display:flex;align-items:flex-end;justify-content:center;gap:3px;height:100%}
+  .inflo .ib{width:13px;border-radius:2px 2px 0 0;position:relative;min-height:3px}
+  .inflo .ib.kpi{background:var(--teal)}
+  .inflo .ib.jae{background:var(--gold)}
+  .inflo .ib.fc{opacity:.55}
+  .inflo .ib span{position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:8.5px;color:var(--slate);white-space:nowrap}
+  .inflo .target{position:absolute;left:0;right:0;bottom:55.5%;border-top:1.5px dashed var(--ok)}
+  .inflo .target span{position:absolute;right:0;top:-13px;font-family:var(--mono);font-size:9px;color:var(--ok);background:var(--paper);padding:0 3px}
+  .inflo-x{display:flex;gap:9px}
+  .inflo-x div{flex:1;text-align:center;font-family:var(--mono);font-size:9px;color:var(--slate)}
+
+  .twocol{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:760px){.twocol{grid-template-columns:1fr}}
+  ul.tight{margin:0 0 6px;padding-left:18px}
+  ul.tight li{margin-bottom:5px;color:var(--ink-soft);font-size:13px}
+  ul.tight li::marker{color:var(--accent)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <span class="brand">Kritisk dashbord</span>
+    <a href="#hero">Dom</a>
+    <a href="#params">Parametre</a>
+    <a href="#olje">Oljepengebruk</a>
+    <a href="#oecd">OECD-blikk</a>
+    <a href="#ledger">Påstand-for-påstand</a>
+    <a href="#matrix">Modellkobling</a>
+    <a href="#synth">Syntese</a>
+    <a href="#kilder">Kilder</a>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- ========================= HERO ========================= -->
+<section class="card" id="hero">
+  <div class="eyebrow">Kritisk lesning · nivå 3 · faktasjekk møter modellapparat</div>
+  <h1>«Skapt av ingenting» — hva som stemmer, hva som skurrer, og hva modellene faktisk sier</h1>
+  <p class="sub">En strukturert vurdering av Thomas Rosseland Wiborg-Thunes essay om gjeld og pengeskaping (20.06.2026), holdt opp mot det makroøkonomiske modellapparatet norske myndigheter faktisk bruker — <span class="term">KVARTS</span>, <span class="term">MODAG</span>, <span class="term">NEMO</span>, <span class="term">NORA</span>, <span class="term">SNOW</span>, <span class="term">DEMEC</span>, <span class="term">MOSART</span>, <span class="term">LOTTE</span>.</p>
+
+  <div class="governing">
+    Hovedfunn: Artikkelen har en <strong>solid empirisk kjerne</strong> (endogen pengeskaping, gjeldstall, rentebane — alt etterprøvbart riktig) båret av en <strong>svakere normativ overbygning</strong> (østerriksk konjunkturteori og en M2-vekstregel) som dels motsier artikkelens egen åpningspremiss og dels ignorerer hvorfor apparatet ser ut som det gjør.
+  </div>
+
+  <div class="hero-grid">
+    <div>
+      <div class="small" style="margin-bottom:6px"><b>Fordeling av 24 etterprøvbare påstander</b></div>
+      <div class="verdict-bar">
+        <div class="seg ok"  style="flex:11">11 riktig</div>
+        <div class="seg warn" style="flex:9">9 delvis</div>
+        <div class="seg bad" style="flex:4">4 feil</div>
+      </div>
+      <div class="legend">
+        <span><i style="background:var(--ok)"></i> <b>Riktig</b> — empirisk dekket / korrekt referert</span>
+        <span><i style="background:var(--warn)"></i> <b>Delvis / misvisende</b> — sann kjerne, skjev innramming</span>
+        <span><i style="background:var(--bad)"></i> <b>Feil</b> — faktafeil eller intern selvmotsigelse</span>
+      </div>
+      <p class="small" style="margin-top:14px">Mønsteret er konsistent: påstandene blir <b>svakere jo mer normative de er</b>. Det som kan slås opp i en tabell, stemmer; det som krever en teori om hvordan økonomien <i>bør</i> styres, halter.</p>
+    </div>
+    <div>
+      <div class="note" style="margin:0">
+        <b>Den røde tråden i kritikken.</b> Artikkelen åpner med <i>endogen pengeteori</i> (penger skapes av etterspørsel etter lån) — som er riktig — men foreslår så en <i>M2-vekstregel</i> og et <i>«mellomledds»-bilde</i> av sparing og kapitalkrav, som forutsetter at penger er <i>eksogene</i> og styrbare. Det er to uforenlige verdensbilder i samme tekst.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= PARAMETRE ========================= -->
+<section class="card" id="params">
+  <div class="eyebrow neutral">Nivå 1 · de bærende tallene, verifisert mot primærkilde</div>
+  <h2>Nøkkelparametrene artikkelen hviler på</h2>
+  <div class="governing">De fire makrotallene som faktasjekken står og faller på, hentet ferskt fra Norges Bank og SSB (juni 2026). Tre stemmer; ett er en forveksling.</div>
+
+  <div class="kpis">
+    <div class="kpi">
+      <span class="chip ok">✓</span>
+      <div class="v">21 286 <small>mrd</small></div>
+      <div class="l">Oljefondet (SPU) per 31.12.2025. Krysset 20 000 mrd i 2025. Artikkelen: «passerte nylig 20 000» — <b>riktig</b>.</div>
+    </div>
+    <div class="kpi">
+      <span class="chip ok">✓</span>
+      <div class="v">4,25 <small>% i dag</small></div>
+      <div class="l">Styringsrente per 18.06.2026 (PPR 2/26). Hevet fra 4,0 % i mai 2026. Artikkelens «fra null til over fire» — <b>fortsatt riktig</b>.</div>
+    </div>
+    <div class="kpi">
+      <span class="chip warn">△</span>
+      <div class="v">3 193 <small>mrd</small></div>
+      <div class="l">Pengemengden <b>M3</b>, des. 2024 (SSB). Artikkelens «~3 500» for 2024 var ~10 % for høyt — det er omtrent M3-nivået i 2026 (apr. 2026: <b>3 576 mrd, +8,4 % å/å</b>).</div>
+    </div>
+    <div class="kpi">
+      <span class="chip ok">✓</span>
+      <div class="v">~7 → ~3 <small>%</small></div>
+      <div class="l">KPI-inflasjon: topp 7,5 % (okt. 2022) → mot 3 % (2024). Rentehevingen virker «med etterslep» — <b>riktig</b>.</div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <div class="twocol">
+    <div>
+      <div class="eyebrow neutral" style="margin-bottom:8px">Styringsrente: faktisk + rentebane (Norges Bank, PPR 2/26)</div>
+      <div class="ratebars">
+        <div class="rb" style="height:6%"><span>0,25</span></div>
+        <div class="rb" style="height:52%"><span>2,75</span></div>
+        <div class="rb" style="height:80%"><span>4,25</span></div>
+        <div class="rb peak" style="height:85%"><span>4,5</span></div>
+        <div class="rb" style="height:75%"><span>4,0</span></div>
+        <div class="rb now" style="height:80%"><span>4,25</span></div>
+        <div class="rb fc" style="height:85%"><span>4,5</span></div>
+        <div class="rb fc" style="height:79%"><span>4,2</span></div>
+        <div class="rb fc" style="height:70%"><span>3,7</span></div>
+        <div class="rb fc" style="height:60%"><span>3,2</span></div>
+      </div>
+      <div class="ratebars-x">
+        <div>2021</div><div>2022</div><div>2023</div><div>2024</div><div>2025</div><div>i&nbsp;dag</div><div>’26</div><div>’27</div><div>’28</div><div>’29</div>
+      </div>
+      <div class="legend" style="margin-top:10px">
+        <span><i style="background:var(--indigo)"></i> faktisk (årsslutt)</span>
+        <span><i style="background:var(--accent)"></i> i dag · 4,25 %</span>
+        <span><i style="background:repeating-linear-gradient(45deg,#9fb0d6,#9fb0d6 3px,#cdd6ea 3px,#cdd6ea 6px)"></i> rentebane (prognose)</span>
+      </div>
+      <p class="small" style="margin-top:10px"><b>Rentebanen, PPR 2/26 (18.06.2026):</b> renten ventes å stige videre til <b>knapt 4,5 %</b> mot slutten av 2026, før et gradvis fall fra midten av 2027 ned mot et nøytralt nivå på <b>~3,2 %</b> i 2029. Banen er betinget og revideres hvert kvartal.</p>
+      <div class="note" style="margin-top:10px;font-size:12.5px">
+        <b>Komiteens vurdering (18.06.2026).</b> Norges Bank ga ikke ut noe frittstående notat, men publiserte vurderingen i PPR 2/26 og i «Sammendrag av komiteens diskusjoner». Kjernen: prisveksten er <b>for høy</b>, kjerneinflasjon nær 3 % siden 2024 drevet av <b>lønns- og kostnadsvekst</b>, og ny informasjon tyder på <b>noe sterkere prispress enn ventet</b>. Eksplisitt signal: «trolig vil det bli behov for å sette renten <b>videre opp</b> på et av de nærmeste rentemøtene». Komiteen varsler altså heving, ikke kutt.
+      </div>
+    </div>
+    <div>
+      <div class="eyebrow neutral" style="margin-bottom:8px">Gjeldstallene — størrelsesorden bekreftet</div>
+      <table class="tbl">
+        <thead><tr><th>Indikator (artikkelens tall)</th><th class="num">Verdi</th><th>Dom</th></tr></thead>
+        <tbody>
+          <tr><td>Husholdningsgjeld / disp. inntekt, 1994</td><td class="num">115 %</td><td><span class="chip ok">✓</span></td></tr>
+          <tr><td>Samme, 2024 <span class="small">(NB: gjeldsbelastning ~245 %)</span></td><td class="num">~230 %</td><td><span class="chip ok">✓</span></td></tr>
+          <tr><td>Husholdningsgjeld / BNP (IMF)</td><td class="num">~100 %</td><td><span class="chip ok">✓</span></td></tr>
+          <tr><td>Gjeldsgrad nye boliglån 2024 <span class="small">(tak: 500 %)</span></td><td class="num">323 %</td><td><span class="chip ok">✓</span></td></tr>
+          <tr><td>USA, gjeld / disp. inntekt</td><td class="num">~110 %</td><td><span class="chip ok">✓</span></td></tr>
+          <tr><td>Storbritannia, gjeld / disp. inntekt</td><td class="num">~150 %</td><td><span class="chip ok">✓</span></td></tr>
+        </tbody>
+      </table>
+      <div class="tbl-cap">Gjeldstallene er gjennomgående korrekte. Eneste nyanse: Norges Banks «gjeldsbelastning» ligger nærmere 245 % (litt annen definisjon), men artikkelens 230 % er innenfor.</div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <div class="eyebrow neutral" style="margin-bottom:6px">Inflasjonsbanen — transmisjonens motstykke til rentebanen (PPR 2/26)</div>
+  <div class="twocol">
+    <div>
+      <div class="inflo">
+        <div class="target"><span>mål 2,0 %</span></div>
+        <div class="yr"><div class="ib kpi" style="height:86%"><span>3,1</span></div><div class="ib jae" style="height:94%"><span>3,4</span></div></div>
+        <div class="yr"><div class="ib kpi fc" style="height:89%"><span>3,2</span></div><div class="ib jae fc" style="height:89%"><span>3,2</span></div></div>
+        <div class="yr"><div class="ib kpi fc" style="height:69%"><span>2,5</span></div><div class="ib jae fc" style="height:69%"><span>2,5</span></div></div>
+        <div class="yr"><div class="ib kpi fc" style="height:61%"><span>2,2</span></div><div class="ib jae fc" style="height:61%"><span>2,2</span></div></div>
+        <div class="yr"><div class="ib kpi fc" style="height:56%"><span>2,0</span></div><div class="ib jae fc" style="height:56%"><span>2,0</span></div></div>
+      </div>
+      <div class="inflo-x"><div>mai ’26</div><div>2026</div><div>2027</div><div>2028</div><div>2029</div></div>
+      <div class="legend" style="margin-top:10px">
+        <span><i style="background:var(--teal)"></i> KPI</span>
+        <span><i style="background:var(--gold)"></i> KPI-JAE (kjerne)</span>
+        <span><i style="background:var(--ok);height:0;border-top:2px dashed var(--ok)"></i> inflasjonsmål 2,0 %</span>
+        <span style="color:var(--slate)">blass = prognose</span>
+      </div>
+    </div>
+    <div>
+      <div class="note" style="margin:0">
+        <b>Les de to banene sammen.</b> Kjerneinflasjonen (KPI-JAE) er <b>3,4 %</b> i mai 2026 — godt over målet — og det er nettopp derfor renten ble <b>hevet til 4,25 %</b> og ventes videre opp. Norges Bank anslår at inflasjonen først er <b>tilbake på 2 % i 2029</b>, samme år renten når sitt nøytrale nivå (~3,2 %). Dette er transmisjonen i NEMO i praksis: høy rente nå → svakere etterspørsel og sterkere krone → inflasjon mot mål med flere års etterslep.
+      </div>
+      <p class="small" style="margin-top:10px">Merk kontrasten til artikkelen, som ble publisert <b>to dager etter</b> denne rapporten: der heter det at «renten ser ut til å virke». Norges Banks egen bane sier at jobben tar <b>tre år til</b>.</p>
+    </div>
+  </div>
+
+  <div class="flag" style="margin-top:18px">
+    <b>Den ene tallfeilen som betyr noe.</b> Artikkelen sammenligner <b>oljepengebruken (~500–542 mrd, en årlig strøm)</b> med <b>M3 (~3 500 mrd, en beholdning)</b> for å antyde at oljepengene er et stort inflasjonsdriv. Dette er en <b>strøm-mot-beholdning-forveksling</b>: en flyt kan ikke meningsfullt måles som andel av en beholdning. I tillegg var M3 faktisk <b>3 193 mrd ved utgangen av 2024</b> (ikke 3 500 — det er omtrent M3-nivået i 2026) og er 3 576 mrd i apr. 2026. Begge modellfamiliene som faktisk regner på dette (<span class="mb dsge">NORA</span> <span class="mb cge">DEMEC</span> <span class="mb econ">MODAG</span>) behandler oljepengebruk som <i>finanspolitikk under handlingsregelen</i> — ikke som pengeskaping.
+  </div>
+
+  <div class="src">
+    <b>Kilder (verifisert 18.06.2026):</b> Norges Bank, styringsrente (IR-serien) = 4,25 % i dag; rentebane og inflasjonsbane (KPI/KPI-JAE) fra Pengepolitisk rapport 2/26 (18.06.2026): KPI-JAE 3,4 % i mai ’26 → 2,0 % i 2029. NBIM, fondsverdi per 31.12.2025 = 21 286 mrd. SSB tabell 10945 «Pengemengden M1, M2 og M3»: M2/M3 des. 2024 = 3 183 035 / 3 192 854 mill. kr; M2/M3 apr. 2026 = 3 565 993 / 3 575 895 mill. kr (M3-vekst +8,4 % å/å). KPI-topp og gjeldstall: SSB/Norges Bank/Finanstilsynets boliglånsundersøkelse/IMF.
+  </div>
+</section>
+
+<!-- ========================= OLJEPENGEBRUK ========================= -->
+<section class="card" id="olje">
+  <div class="eyebrow neutral">Fordypning · artikkelens påstand om «strukturell tilførsel av kjøpekraft»</div>
+  <h2>Oljepengebruken siden 2020 — to sannheter i én graf</h2>
+  <div class="governing">I kroner har oljepengebruken nesten <strong>doblet seg</strong> på seks år. Målt mot handlingsregelen (andel av fondet) har den likevel ligget <strong>under 3 %-banen siden 2021</strong> — fordi fondet selv har doblet seg. Begge er sanne samtidig, og det er nettopp poenget.</div>
+
+  <svg viewBox="0 0 1000 380" role="img" aria-label="Oljepengebruk 2019-2026 i kroner mot 3-prosentbanen">
+    <!-- y-akse + rutenett -->
+    <line x1="70" y1="30" x2="70" y2="310" stroke="#5d6b80" stroke-width="1.2"/>
+    <line x1="70" y1="310" x2="965" y2="310" stroke="#5d6b80" stroke-width="1.2"/>
+    <g stroke="#eef1f6" stroke-width="1">
+      <line x1="70" y1="230" x2="965" y2="230"/>
+      <line x1="70" y1="150" x2="965" y2="150"/>
+      <line x1="70" y1="70" x2="965" y2="70"/>
+    </g>
+    <g font-family="Consolas,Menlo,monospace" font-size="10" fill="#8a97a8">
+      <text x="64" y="313" text-anchor="end">0</text>
+      <text x="64" y="233" text-anchor="end">200</text>
+      <text x="64" y="153" text-anchor="end">400</text>
+      <text x="64" y="73" text-anchor="end">600</text>
+      <text x="20" y="170" text-anchor="middle" transform="rotate(-90 20 170)" fill="#5d6b80" font-style="italic">mrd. kr</text>
+    </g>
+
+    <!-- søyler: uttak i kroner -->
+    <g>
+      <rect x="100" y="213" width="50" height="97"  fill="#3a4a8c"/>
+      <rect x="211" y="152" width="50" height="158" fill="#c0552b"/>
+      <rect x="322" y="185" width="50" height="125" fill="#3a4a8c"/>
+      <rect x="433" y="169" width="50" height="141" fill="#3a4a8c"/>
+      <rect x="544" y="183" width="50" height="127" fill="#3a4a8c"/>
+      <rect x="655" y="162" width="50" height="148" fill="#3a4a8c"/>
+      <rect x="766" y="126" width="50" height="184" fill="#3a4a8c"/>
+      <rect x="877" y="78"  width="50" height="232" fill="#23364f"/>
+    </g>
+
+    <!-- kr-verdier over søyler -->
+    <g font-family="Consolas,Menlo,monospace" font-size="11" font-weight="700" fill="#13233a" text-anchor="middle">
+      <text x="125" y="206">243</text>
+      <text x="236" y="145">395</text>
+      <text x="347" y="178">313</text>
+      <text x="458" y="162">352</text>
+      <text x="569" y="176">317</text>
+      <text x="680" y="155">370</text>
+      <text x="791" y="119">460</text>
+      <text x="902" y="71">579</text>
+    </g>
+
+    <!-- 3%-banen (handlingsregelen) -->
+    <polyline points="125,211 236,189 347,179 458,162 569,161 680,121 791,73 902,54"
+      fill="none" stroke="#2f7d4f" stroke-width="2" stroke-dasharray="6 4"/>
+    <g fill="#2f7d4f">
+      <circle cx="125" cy="211" r="3"/><circle cx="236" cy="189" r="3"/><circle cx="347" cy="179" r="3"/>
+      <circle cx="458" cy="162" r="3"/><circle cx="569" cy="161" r="3"/><circle cx="680" cy="121" r="3"/>
+      <circle cx="791" cy="73" r="3"/><circle cx="902" cy="54" r="3"/>
+    </g>
+    <text x="902" y="46" text-anchor="end" font-size="11" font-weight="700" fill="#2f7d4f">3 %-grensen ≈ 639 mrd</text>
+
+    <!-- COVID-markør -->
+    <text x="236" y="135" text-anchor="middle" font-size="9.5" fill="#c0552b" font-style="italic">COVID — over banen (3,6 %)</text>
+
+    <!-- x-akse: år + uttaksprosent -->
+    <g font-family="Consolas,Menlo,monospace" text-anchor="middle">
+      <g font-size="11" font-weight="700" fill="#13233a">
+        <text x="125" y="328">2019</text><text x="236" y="328">2020</text><text x="347" y="328">2021</text>
+        <text x="458" y="328">2022</text><text x="569" y="328">2023</text><text x="680" y="328">2024</text>
+        <text x="791" y="328">2025</text><text x="902" y="328">2026</text>
+      </g>
+      <g font-size="10" fill="#5d6b80">
+        <text x="125" y="344">2,4 %</text><text x="236" y="344">3,6 %</text><text x="347" y="344">2,5 %</text>
+        <text x="458" y="344">2,8 %</text><text x="569" y="344">2,0 %</text><text x="680" y="344">1,9 %</text>
+        <text x="791" y="344">2,2 %</text><text x="902" y="344">2,7 %</text>
+      </g>
+      <text x="517" y="368" font-size="9.5" fill="#8a97a8" font-style="italic">søyle = oljepengebruk i kroner · tall under år = uttak som andel av fondet</text>
+    </g>
+  </svg>
+
+  <div class="twocol" style="margin-top:8px">
+    <div class="modelrow" style="border-style:solid;border-color:var(--ok);background:var(--ok-soft)">
+      <h5 style="color:var(--ok)">✓ Det artikkelen får rett</h5>
+      <ul class="tight" style="margin:0">
+        <li>I kroner har bruken vokst fra <b>243 mrd (2019)</b> til <b>579 mrd (2026)</b> — mer enn en dobling, og den <b>akselererer</b> 2024→2026.</li>
+        <li>2026-uttaket er <b>2,7 %</b> — «nærmere taket enn noen gang» i normalår.</li>
+        <li>Dette <i>er</i> en reell, vedvarende etterspørselsimpuls inn i fastlandsøkonomien.</li>
+      </ul>
+    </div>
+    <div class="modelrow" style="border-style:solid;border-color:var(--warn);background:var(--warn-soft)">
+      <h5 style="color:var(--warn)">△ Det som mangler</h5>
+      <ul class="tight" style="margin:0">
+        <li>Som <b>andel av fondet falt</b> bruken til ~2,0 % i 2023–24; veksten i kroner skyldes mest at fondet doblet seg (10 900 → 21 286 mrd).</li>
+        <li>Bruken har ligget <b>under 3 %-banen siden 2021</b> — altså innenfor handlingsregelen, ikke et brudd.</li>
+        <li>Dette er <b>finanspolitikk</b>, ikke pengeskaping — jf. strøm/beholdning-feilen i artikkelen.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="note" style="margin-top:14px">
+    <b>Modellkobling.</b> Akkurat denne størrelsen — oljepengebruk under handlingsregelen — er en <i>eksogen forutsetning mennesket setter inn</i> i <span class="mb econ">MODAG</span>, og en endogen budsjettbeskrankning i <span class="mb dsge">NORA</span> og <span class="mb cge">DEMEC</span>. Multiplikatoren (hvor mye 1 oljekrone løfter BNP) er tilstandsavhengig i NORA. Ingen av modellene behandler uttaket som en økning i pengemengden — det er en omplassering av en statlig formue til innenlandsk etterspørsel.
+  </div>
+
+  <div class="note" style="margin-top:14px">
+    <b>OECDs ramme rundt det samme.</b> OECD Economic Survey 2026 bekrefter bildet og skjerper det: det strukturelle ikke-olje-underskuddet nådde <b>rekord 11,6 % av fastlands-BNP i 2025</b>, uttaket var <b>2,7 %</b> (innenfor 3 %-regelen), og fondsuttaket finansierer nå <b>27 % av offentlige utgifter — opp fra 3 % i 2001</b>. OECD anbefaler ikke en M2-regel, men en <b>strukturell utgiftsplan / mellomlangt budsjettrammeverk (MTEF)</b> med «escape clauses» mot store fondssvingninger — Norge er nær det eneste OECD-landet uten MTEF.
+  </div>
+
+  <div class="flag">
+    <b>Om tallene.</b> Artikkelen oppga ~500 mrd (2025) og 542 mrd (2026); senere budsjettrunder satte tallene til <b>534 mrd (2025)</b> og <b>579 mrd (2026)</b>. Avviket er budsjettrevisjoner, ikke en feil hos forfatteren — størrelsesordenen var riktig. Uttaksprosenten er det strukturelt meningsfulle målet.
+  </div>
+
+  <div class="src">
+    <b>Kilder.</b> Strukturelt oljekorrigert underskudd og uttaksprosent: Nasjonalbudsjettet 2026 (Meld. St. 1 (2025–2026)); Finansdepartementet/Finans Norge (handlingsregelen); fondsverdi fra NBIM. 3 %-grensen beregnet som 3 % av fondets verdi ved inngangen til budsjettåret (≈ 639 mrd for 2026). Serie 2019–2026 sammenstilt fra budsjettdokumenter; enkelte år justeres mellom forslag, revidert og endelig regnskap.
+  </div>
+</section>
+
+<!-- ========================= OECD ========================= -->
+<section class="card" id="oecd">
+  <div class="eyebrow neutral">Eksternt blikk · uavhengig fasit fra juni 2026</div>
+  <h2>OECD Economic Survey Norway 2026 — hva en ekstern autoritet sier om de samme spørsmålene</h2>
+  <div class="governing">OECDs landrapport (19. mai / juni 2026) og Economic Outlook nr. 119 gir en uavhengig kryss-sjekk på artikkelens påstander. Konklusjonen: OECD <strong>støtter gjeldsdiagnosen</strong>, men <strong>nyanserer boligforklaringen</strong> kraftig og <strong>motsier reformene</strong> om pengepolitisk regel.</div>
+
+  <div class="grid2">
+    <div>
+      <div class="eyebrow neutral" style="margin-bottom:6px">OECDs framskrivinger for Norge (Economic Outlook 119)</div>
+      <table class="tbl">
+        <thead><tr><th>Indikator</th><th class="num">2024</th><th class="num">2025</th><th class="num">2026</th><th class="num">2027</th></tr></thead>
+        <tbody>
+          <tr><td>Fastlands-BNP, vekst %</td><td class="num">0,6</td><td class="num">1,8</td><td class="num">1,7</td><td class="num">1,5</td></tr>
+          <tr><td>Kjerneinflasjon (KPI-JAE) %</td><td class="num">3,5</td><td class="num">2,7</td><td class="num">3,0</td><td class="num">2,4</td></tr>
+          <tr><td>Arbeidsledighet %</td><td class="num">4,0</td><td class="num">4,5</td><td class="num">4,5</td><td class="num">4,5</td></tr>
+          <tr><td>Produksjonsgap (% pot.)</td><td class="num">−0,5</td><td class="num">−0,3</td><td class="num">0,0</td><td class="num">0,3</td></tr>
+          <tr><td>Kort rente %</td><td class="num">4,7</td><td class="num">4,4</td><td class="num">4,4</td><td class="num">4,4</td></tr>
+          <tr><td>Lang rente (statsobl.) %</td><td class="num">3,6</td><td class="num">4,0</td><td class="num">4,2</td><td class="num">4,2</td></tr>
+          <tr><td>Off. budsjettoverskudd (% BNP)</td><td class="num">12,7</td><td class="num">10,4</td><td class="num">11,1</td><td class="num">9,6</td></tr>
+          <tr><td><b>Strukturell ikke-olje-balanse</b> (% pot.)</td><td class="num">0,1</td><td class="num">−1,3</td><td class="num">−2,1</td><td class="num">−1,8</td></tr>
+          <tr><td>Husholdningenes sparerate %</td><td class="num">4,2</td><td class="num">4,3</td><td class="num">4,2</td><td class="num">4,2</td></tr>
+          <tr><td>Driftsbalanse (% BNP)</td><td class="num">15,0</td><td class="num">13,8</td><td class="num">17,1</td><td class="num">12,3</td></tr>
+        </tbody>
+      </table>
+      <div class="tbl-cap">Kilde: OECD Economic Outlook 119 (filtrert for Norge). Den strukturelle ikke-olje-balansen forverres ~2 pp fra 2024 til 2026 — OECDs mål på at finanspolitikken <b>går motsatt vei</b> — den blir mer ekspansiv.</div>
+    </div>
+    <div>
+      <div class="box accent" style="margin-bottom:14px">
+        <h4>OECDs hovedbudskap (juni 2026)</h4>
+        <ul class="tight" style="font-size:12.5px;margin:0">
+          <li>Husholdningsgjelden er <b>høyest i OECD</b> og stiger igjen — «warrants close monitoring».</li>
+          <li>Boligprisene har steget mer enn i noe annet nordisk land; problemet er <b>strukturelle byggebegrensninger</b> (jordvern, regulering, arealtilgang), ikke bare kreditt.</li>
+          <li>Makrotilsynet ble <b>lempet</b> (LTV 85→90 %); ytterligere lemping «would be unwarranted».</li>
+          <li>Det strukturelle ikke-olje-underskuddet nådde <b>rekord 11,6 % av fastlands-BNP</b> i 2025; uttaket 2,7 % — innenfor 3 %-regelen.</li>
+          <li>Uttaket finansierer nå <b>27 % av offentlige utgifter</b> (3 % i 2001); fondet &gt; 400 % av BNP.</li>
+          <li>Pengepolitisk rammeverk: fleksibel inflasjonsstyring «broadly positive» — <b>behold og styrk det</b>.</li>
+        </ul>
+      </div>
+      <div class="note" style="margin:0">
+        <b>Nøytral realrente, ikke østerriksk naturlig rente.</b> OECD/Norges Bank anslår et empirisk <b>nøytralt realrentenivå (r*) på 0,25–1,5 %</b> (opp fra −0,3 % i 2019) — et ny-keynesiansk, målbart begrep. Det er dette, ikke Hayeks uobserverbare «naturlige rente», apparatet faktisk opererer med.
+      </div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <div class="eyebrow neutral" style="margin-bottom:8px">OECD 2026 mot artikkelen — punkt for punkt</div>
+  <table class="tbl">
+    <thead><tr><th>Tema</th><th>Hva OECD 2026 sier</th><th>Forhold til artikkelen</th></tr></thead>
+    <tbody>
+      <tr><td><b>Husholdningsgjeld</b></td><td>Høyest i OECD, drevet av boliglån, stiger igjen — en sårbarhet som må overvåkes.</td><td><span class="chip ok">støtter</span></td></tr>
+      <tr><td><b>Boligpriser</b></td><td>Lav tilbudsrespons → strukturelle byggebegrensninger. Anbefaler arealreform, ikke kredittinngrep.</td><td><span class="chip warn">nyanserer</span></td></tr>
+      <tr><td><b>Bankenes margin</b></td><td>«High interest income underpins profitability» — bankene er svært lønnsomme.</td><td><span class="chip ok">støtter</span></td></tr>
+      <tr><td><b>Boligskatt / rentefradrag</b></td><td>Den gunstige boligbeskatningen kapitaliseres i prisene; lett boligskatt «needs reform».</td><td><span class="chip ok">støtter+utvider</span></td></tr>
+      <tr><td><b>Oljepengebruk</b></td><td>Strukturelt ikke-olje-underskudd på rekordnivå, men innenfor 3 %-regelen; anbefaler utgiftsplan/MTEF.</td><td><span class="chip ok">støtter diagnose</span></td></tr>
+      <tr><td><b>Østerriksk «naturlig rente»</b></td><td>Bruker empirisk nøytral realrente r* = 0,25–1,5 % (ny-keynesiansk).</td><td><span class="chip bad">motsier</span></td></tr>
+      <tr><td><b>Pengepolitisk regel (M2)</b></td><td>Behold og styrk fleksibel inflasjonsstyring som primært mål. Rammeverket «works well».</td><td><span class="chip bad">motsier</span></td></tr>
+      <tr><td><b>Egenkapitalkrav</b></td><td>Buffere uendret (motsyklisk 2,5 %, systemrisiko 4,5 %); lemping av husholdningskrav «unwarranted».</td><td><span class="chip warn">delvis</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="flag">
+    <b>Den skarpeste eksterne dommen.</b> Artikkelens to mest selvsikre reformer — en <b>M2-vekstregel</b> og en kritikk av «diskresjonært» mandat — møter et direkte nei fra OECD, som anbefaler å <b>bevare og styrke</b> nettopp den fleksible inflasjonsstyringen artikkelen vil erstatte. Omvendt får gjeldsdiagnosen og rentefradragskritikken eksplisitt støtte — men OECD plasserer hovedansvaret for boligprisene på <b>tilbudssiden</b>, ikke på kredittskapingen.
+  </div>
+
+  <div class="src">
+    <b>Kilder.</b> OECD (2026), <i>OECD Economic Surveys: Norway 2026</i>, OECD Publishing, Paris (DOI 10.1787/5cc02644-en), godkjent 19.05.2026 — Executive summary, Key Policy Insights (pengepolitikk, finanspolitikk, bolig/gjeld), Table 1.8 (Main findings &amp; recommendations). OECD <i>Economic Outlook</i> nr. 119 (dataflyt DSD_EO@DF_EO), filtrert for Norge, 2023–2027.
+  </div>
+</section>
+
+<!-- ========================= LEDGER ========================= -->
+<section class="card" id="ledger">
+  <div class="eyebrow neutral">Nivå 2 · 24 påstander, gruppert · klikk for å åpne</div>
+  <h2>Påstand-for-påstand: hva stemmer, hva skurrer</h2>
+  <div class="governing">Hver påstand får en dom (riktig / delvis / feil), en <span style="color:var(--ok)">«det stemmer»</span>-side, en <span style="color:var(--bad)">«det skurrer»</span>-side, og en kobling til modellen som faktisk analyserer spørsmålet.</div>
+
+  <div class="filterbar">
+    <button class="fbtn active" data-f="all">Alle</button>
+    <button class="fbtn ok" data-f="ok">Riktig</button>
+    <button class="fbtn warn" data-f="warn">Delvis</button>
+    <button class="fbtn bad" data-f="bad">Feil</button>
+    <span class="fcount" id="fcount"></span>
+  </div>
+
+  <div id="ledger-mount"></div>
+</section>
+
+<!-- ========================= MATRIX ========================= -->
+<section class="card" id="matrix">
+  <div class="eyebrow neutral">Nivå 3 · syntesen brukeren ba om</div>
+  <h2>Hvilken modell svarer egentlig på hver påstand?</h2>
+  <div class="governing">Artikkelen argumenterer som om Norge mangler et apparat for disse spørsmålene. Det gjør det ikke. Matrisen viser hvor hvert tema faktisk behandles — og at flere av artikkelens «blindsoner» er midt i modellenes kjernekompetanse.</div>
+
+  <div class="matrix-scroll">
+    <table class="mx">
+      <thead>
+        <tr>
+          <th class="rowh">Tema i artikkelen</th>
+          <th>KVARTS<br><span class="mb econ" style="margin:0">makroøk</span></th>
+          <th>MODAG<br><span class="mb econ" style="margin:0">makroøk</span></th>
+          <th>NEMO<br><span class="mb dsge" style="margin:0">DSGE</span></th>
+          <th>NORA<br><span class="mb dsge" style="margin:0">DSGE</span></th>
+          <th>SNOW/DEMEC<br><span class="mb cge" style="margin:0">CGE</span></th>
+          <th>LOTTE/MOSART<br><span class="mb micro" style="margin:0">mikro</span></th>
+        </tr>
+      </thead>
+      <tbody id="matrix-mount"></tbody>
+    </table>
+  </div>
+  <p class="small" style="margin-top:10px"><span class="dot p"></span> primær analysemodell &nbsp;·&nbsp; <span class="dot s"></span> berører temaet</p>
+
+  <div class="flag">
+    <b>Poenget med matrisen.</b> Det finnes <b>ingen</b> norsk myndighetsmodell bygget på østerriksk konjunkturteori eller på M2-styring — ikke fordi temaet er tabu, men fordi apparatet er <b>rentebasert og ny-keynesiansk/empirisk</b>. NEMOs tapsfunksjon <span class="term">L = (π−π*)² + λŷ² + ν(Δi)²</span> <i>er</i> en regelforankret optimering med skjønn på toppen. Artikkelens «regel vs. skjønn» er dermed en falsk motsetning: apparatet er allerede begge deler.
+  </div>
+</section>
+
+<!-- ========================= SYNTESE ========================= -->
+<section class="card" id="synth">
+  <div class="eyebrow neutral">Nivå 4 · den indre spenningen</div>
+  <h2>Hvorfor de to halvdelene av artikkelen ikke kan stemme samtidig</h2>
+  <div class="governing">Artikkelens diagnose og dens medisin bygger på motstridende pengeteorier. Det er den dypeste kritikken — dypere enn enkelttallene.</div>
+
+  <div class="twocol">
+    <div class="modelrow" style="border-style:solid;border-color:var(--ok);background:var(--ok-soft)">
+      <h5 style="color:var(--ok)">Halvdel 1 — diagnosen (endogene penger)</h5>
+      <ul class="tight">
+        <li>Penger skapes når banker gir lån; ikke et fast «kvantum» som lånes ut.</li>
+        <li>Pengemengden bestemmes av <b>etterspørsel etter kreditt</b>, ikke av sentralbankens «trykking».</li>
+        <li>Reservekrav er ≈ 0; kapitalkrav dominerer.</li>
+      </ul>
+      <p class="small" style="margin:6px 0 0"><b>Dette er riktig</b> — og forenlig med hvordan KVARTS/NEMO behandler penger (residualt/endogent).</p>
+    </div>
+    <div class="modelrow" style="border-style:solid;border-color:var(--bad);background:var(--bad-soft)">
+      <h5 style="color:var(--bad)">Halvdel 2 — medisinen (eksogene penger)</h5>
+      <ul class="tight">
+        <li><b>M2-vekstregel på 2–3 %</b> — forutsetter at sentralbanken kan <i>styre</i> pengemengden.</li>
+        <li><b>Kapitalkrav «bremser kredittmultiplikatoren»</b> — gjeninnfører multiplikatorbildet.</li>
+        <li><b>Separat utlåner «henter inn reell sparing»</b> — mellomledds-/loanable-funds-bildet.</li>
+      </ul>
+      <p class="small" style="margin:6px 0 0"><b>Dette forutsetter eksogene penger</b> — stikk i strid med Halvdel 1.</p>
+    </div>
+  </div>
+
+  <div class="note" style="margin-top:18px">
+    <b>Hvis penger virkelig er endogene</b> (Halvdel 1), kan ikke en sentralbank treffe et M2-mål direkte — den setter <i>renten</i>, og pengemengden følger av kredittetterspørselen. Det er nettopp derfor verdens sentralbanker <b>forlot pengemengdestyring på 1980-tallet</b> (ustabil omløpshastighet). At Friedman ville likt en M2-regel er historisk korrekt — men Friedmans regel ble prøvd og forkastet. Artikkelen refererer monetarismens konklusjon uten dens nederlag.
+  </div>
+
+  <div class="twocol" style="margin-top:6px">
+    <div>
+      <h3>Der artikkelen er på sitt sterkeste</h3>
+      <ul class="tight">
+        <li><b>Endogen pengeskaping</b> korrekt forklart og kildebelagt (BoE 2014).</li>
+        <li><b>Gjeldsdiagnosen</b> — tallene er reelle og alvorlige.</li>
+        <li><b>Rentefradrag-reformen</b> — mainstream-økonomi; <span class="mb micro">LOTTE</span> kan beregne den eksakt.</li>
+        <li><b>Krav om marginåpenhet</b> — et reelt informasjonsproblem, et rimelig tiltak.</li>
+        <li><b>Kritikk av strøm/beholdning i oljedebatten</b> — selv om han selv snubler i den.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Der den er på sitt svakeste</h3>
+      <ul class="tight">
+        <li><b>Østerriksk konjunkturteori</b> presentert som etablert; den er heterodoks og empirisk svak.</li>
+        <li><b>M2-vekstregel</b> — motsier egen premiss og ignorerer monetarismens fall.</li>
+        <li><b>Egenkapitalkrav «mot 8–10 %»</b> — <i>under</i> dagens norske CET1-krav (~15–18 %).</li>
+        <li><b>Oljepengebruk vs. M3</b> — strøm-mot-beholdning; M3 var 3 193 mrd (2024), ikke 3 500.</li>
+        <li><b>«Ren gevinst»</b> på renteinntekt — overser finansieringskostnad og risiko.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= PARAMETERTABELL ========================= -->
+<section class="card" id="paramtable">
+  <div class="eyebrow neutral">Vedlegg · alle relevante parametre på ett sted</div>
+  <h2>Parameterregister — artikkelens tall + modellapparatets parametre</h2>
+  <div class="governing">Til etterprøving: makrotallene artikkelen bruker, og de strukturparametrene modellene faktisk opererer med (der mennesket — ikke modellen — gjør valget, er markert).</div>
+
+  <div class="eyebrow neutral" style="margin:6px 0 6px">A · Makrotall (verifisert)</div>
+  <table class="tbl">
+    <thead><tr><th>Parameter</th><th class="num">Verdi</th><th>Kilde / merknad</th><th>Dom</th></tr></thead>
+    <tbody>
+      <tr><td>SPU (Oljefondet)</td><td class="num">21 286 mrd</td><td>NBIM, 31.12.2025</td><td><span class="chip ok">✓</span></td></tr>
+      <tr><td>Styringsrente, syklustopp</td><td class="num">4,5 %</td><td>Norges Bank, des. 2023–2024</td><td><span class="chip ok">✓</span></td></tr>
+      <tr><td>Styringsrente, i dag</td><td class="num">4,25 %</td><td>Norges Bank, per 18.06.2026 (hevet fra 4,0 % i mai)</td><td><span class="chip ok">✓</span></td></tr>
+      <tr><td>Rentebane, slutten av 2026</td><td class="num">~4,5 %</td><td>PPR 2/26 — ventet videre heving</td><td><span class="chip ok">→</span></td></tr>
+      <tr><td>Rentebane, 2029 (nøytralt nivå)</td><td class="num">~3,2 %</td><td>PPR 2/26 — gradvis fall fra midten av 2027</td><td><span class="chip ok">→</span></td></tr>
+      <tr><td>Pengemengde M2 / M3, des. 2024</td><td class="num">3 183 / 3 193 mrd</td><td>SSB 10945 (art. «~3 500» var ~10 % for høyt)</td><td><span class="chip warn">△</span></td></tr>
+      <tr><td>Pengemengde M2 / M3, apr. 2026</td><td class="num">3 566 / 3 576 mrd</td><td>SSB 10945 — fersk; M3 +8,4 % å/å</td><td><span class="chip ok">✓</span></td></tr>
+      <tr><td>KPI-topp</td><td class="num">7,5 %</td><td>SSB, okt. 2022</td><td><span class="chip ok">✓</span></td></tr>
+      <tr><td>Oljepengebruk (strukturelt underskudd)</td><td class="num">~500 / 542 mrd</td><td>2025 / 2026-anslag, statsbudsjett</td><td><span class="chip ok">✓</span></td></tr>
+      <tr><td>Husholdningsgjeld / disp. inntekt</td><td class="num">~230 %</td><td>2024 (NB gjeldsbelastning ~245 %)</td><td><span class="chip ok">✓</span></td></tr>
+      <tr><td>Gjeldsgrad nye boliglån</td><td class="num">323 %</td><td>Finanstilsynet 2024 (tak 500 %)</td><td><span class="chip ok">✓</span></td></tr>
+      <tr><td>Renteinntekt, 1 mill / 5 % / 25 år</td><td class="num">~754’</td><td>annuitet, nominelt — art.: «740’»</td><td><span class="chip ok">✓</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="eyebrow neutral" style="margin:18px 0 6px">B · Politikk-/regelparametre artikkelen tar feil om eller bør justere</div>
+  <table class="tbl">
+    <thead><tr><th>Parameter</th><th class="num">Artikkelen</th><th class="num">Faktisk</th><th>Merknad</th></tr></thead>
+    <tbody>
+      <tr><td>Reservekrav (Norge/euro)</td><td class="num">«fraksjonelt»</td><td class="num">≈ 0 %</td><td>Norge har intet reservekrav; multiplikatorbildet er foreldet</td></tr>
+      <tr><td>CET1-krav, norske banker</td><td class="num">«mot 8–10 %»</td><td class="num">~15–18 %</td><td>Forslaget ligger <b>under</b> dagens krav inkl. buffere</td></tr>
+      <tr><td>Rentefradrag (sats)</td><td class="num">fases ut</td><td class="num">22 %</td><td>= sats på alminnelig inntekt; <span class="mb micro">LOTTE</span> kan score proveny + fordeling</td></tr>
+      <tr><td>Handlingsregelen</td><td class="num">—</td><td class="num">3 % realavkastning</td><td>Justert fra 4 % i 2017; designet for bærekraftig innfasing</td></tr>
+      <tr><td>Gjeldsgrad-tak (utlånsforskriften)</td><td class="num">—</td><td class="num">5 × inntekt</td><td>Makrotilsynsverktøyet artikkelen ikke nevner</td></tr>
+      <tr><td>Belåningsgrad / egenkapitalkrav</td><td class="num">—</td><td class="num">90 % / 10 %</td><td><b>Lempet</b> fra 85 %/15 % fra 01.01.2025 — motsatt vei av artikkelens mål</td></tr>
+      <tr><td>Betjeningsevne (stresstest)</td><td class="num">—</td><td class="num">+3 pp</td><td>Tåle 3 prosentpoeng renteøkning</td></tr>
+      <tr><td>Pengepolitisk regel</td><td class="num">M2-vekst 2–3 %</td><td class="num">fleksibelt inflasjonsmål 2 %</td><td>Forutsetter eksogene penger; motsier egen premiss</td></tr>
+    </tbody>
+  </table>
+
+  <div class="eyebrow neutral" style="margin:18px 0 6px">C · Modellparametre (det apparatet faktisk styrer på — «◣» = mennesket setter inn)</div>
+  <table class="tbl">
+    <thead><tr><th>Modell</th><th class="num">Parameter</th><th class="num">Typisk verdi</th><th>Rolle</th></tr></thead>
+    <tbody>
+      <tr><td><span class="mb econ">KVARTS/MODAG</span></td><td class="sym">α</td><td class="num">0,1–0,4 / kv.</td><td>feiljustering — fart tilbake til likevekt</td></tr>
+      <tr><td><span class="mb econ">MODAG</span></td><td class="sym">◣ multiplikator</td><td class="num">instrumentavh.</td><td>offentlig kjøp &gt; skattelette (Rapporter 2017/9)</td></tr>
+      <tr><td><span class="mb dsge">NEMO</span></td><td class="sym">π*</td><td class="num">2,0 %</td><td>inflasjonsmål i tapsfunksjonen</td></tr>
+      <tr><td><span class="mb dsge">NEMO</span></td><td class="sym">θ (Calvo)</td><td class="num">~0,75</td><td>andel faste priser per kvartal</td></tr>
+      <tr><td><span class="mb dsge">NEMO</span></td><td class="sym">λ</td><td class="num">0,3–0,5</td><td>vekt på produksjonsgap (skjønn vs. inflasjon)</td></tr>
+      <tr><td><span class="mb dsge">NEMO</span></td><td class="sym">σ</td><td class="num">1,0–1,5</td><td>intertemporal substitusjon (Euler/IS)</td></tr>
+      <tr><td><span class="mb dsge">NORA</span></td><td class="sym">◣ konjunkturtilstand</td><td class="num">opp/ned</td><td>tilstandsavhengig multiplikator (Aursland 2020)</td></tr>
+      <tr><td><span class="mb cge">SNOW</span></td><td class="sym">σ, τ<sub>CO₂</sub></td><td class="num">kalibrert</td><td>substitusjonselastisiteter + karbonpris</td></tr>
+      <tr><td><span class="mb micro">MOSART</span></td><td class="sym">P(hendelse)</td><td class="num">estimert</td><td>overgangssannsynligheter per individ/år</td></tr>
+      <tr><td><span class="mb micro">LOTTE-Arbeid</span></td><td class="sym">◣ arbeidstilbudselast.</td><td class="num">skjønn</td><td>atferdsrespons på skatteendring</td></tr>
+    </tbody>
+  </table>
+  <div class="tbl-cap">Verdiene i C er typiske størrelser for modellklassen (jf. kildedokumentet); eksakte posterior-/kalibreringstall per versjon må hentes fra primærdokumentasjonen.</div>
+</section>
+
+<!-- ========================= KILDER ========================= -->
+<section class="card" id="kilder">
+  <div class="eyebrow neutral">Kildeapparat</div>
+  <h2>Kilder og grunnlag</h2>
+  <div class="twocol">
+    <div>
+      <div class="eyebrow neutral" style="margin-bottom:8px">Verifiserte data</div>
+      <ul class="tight">
+        <li>Norges Bank — styringsrente (månedsserie, hentet 2026)</li>
+        <li>NBIM — fondsverdi 31.12.2025 (21 286 mrd)</li>
+        <li>SSB tabell 10945 — Pengemengden M1/M2/M3</li>
+        <li>SSB — KPI; Finanstilsynet — Boliglånsundersøkelsen; IMF — household debt</li>
+        <li>Utlånsforskriften (FOR-2020-12-09-2648), Lovdata + Finansdepartementet — endring fra 01.01.2025 (egenkapital 15 %→10 %)</li>
+        <li>OECD (2026), <i>Economic Surveys: Norway 2026</i> (DOI 10.1787/5cc02644-en); OECD <i>Economic Outlook</i> 119 (DSD_EO@DF_EO), filtrert for Norge</li>
+      </ul>
+      <div class="eyebrow neutral" style="margin:14px 0 8px">Pengeteori</div>
+      <ul class="tight">
+        <li>McLeay, Radia &amp; Thomas (2014): «Money creation in the modern economy», Bank of England QB</li>
+        <li>Benes &amp; Kumhof (2012): «The Chicago Plan Revisited», IMF WP 12/202</li>
+        <li>Jordà, Schularick &amp; Taylor — kreditt og boligpriser</li>
+      </ul>
+    </div>
+    <div>
+      <div class="eyebrow neutral" style="margin-bottom:8px">Modellapparatet (fra kildedokumentet)</div>
+      <ul class="tight">
+        <li>Gerdrup, Kravik mfl. — «Documentation of NEMO», Staff Memo 8/2017; Kravik mfl. (2019)</li>
+        <li>Aursland mfl. (2020): «State-dependent fiscal multipliers in NORA», <i>Economic Modelling</i> 93</li>
+        <li>Boug, Cappelen &amp; Eika (2017): fiskale multiplikatorer, SSB Rapporter 2017/9</li>
+        <li>Boug &amp; Dyvi (red.) (2008): MODAG, SØS 111; Haakonsen (2015): KVARTS, Notater 2015/21</li>
+        <li>Rosnes, Bye &amp; Fæhn (2019): SNOW, Notater 2019/1; Fredriksen &amp; Knudsen (2025): MOSART 7.5</li>
+        <li>Hansen mfl. (2008): LOTTE, Rapporter 2008/36</li>
+      </ul>
+    </div>
+  </div>
+  <div class="src">
+    <b>Metodemerknad.</b> «Dom» er en faktasjekk mot etterprøvbare kilder + en vurdering av intern konsistens, ikke en politisk vurdering av reformforslagene som sådan. Et forslag kan være politisk rimelig (f.eks. utfasing av rentefradrag) selv om enkeltargumentet for det er upresist. Påstander markert △ har en sann kjerne men en innramming som ikke holder. Dette dashbordet er bygget som følgesvenn til «Norske myndigheters makroøkonomiske modeller — teknisk dypdykk».
+  </div>
+</section>
+
+</div><!-- /wrap -->
+
+<script>
+const CLAIMS = [
+  // ---- A. Pengeskaping ----
+  {g:"A. Pengeskaping og endogene penger", v:"ok",
+   q:"Banken skaper penger ved utlån — låner ikke ut andres sparepenger. <span class='src-ref'>«Pengene eksisterte ikke sekundet før … bekreftet av Bank of England 2014.»</span>",
+   truth:"Korrekt og kildebelagt. Lån skaper innskudd; dette er standard endogen pengeteori, eksplisitt slått fast av McLeay, Radia &amp; Thomas (BoE 2014).",
+   prob:"Ingen reell innvending. Dette er artikkelens sterkeste, mest etterprøvbare påstand.", probWarn:false,
+   models:["KVARTS behandler kreditt/penger langt på vei endogent; NEMO har banker med kredittpåslag og pant/LTV. Apparatet motsier ikke dette — men setter det ikke i sentrum."]},
+
+  {g:"A. Pengeskaping og endogene penger", v:"warn",
+   q:"Systemet kalles «fraksjonell reservebankvirksomhet» — bankene holder bare en brøkdel i reserver.",
+   truth:"Riktig at reservekrav er ≈ 0 og at kapitalkrav overtok etter 2008. Norge har i praksis intet reservekrav.",
+   prob:"«Fraksjonell reserve» tilhører multiplikator-modellen, som artikkelen nettopp motsa med den endogene forklaringen. Begrepet drar leseren mot et utdatert bilde av pengeskaping.", probWarn:true,
+   models:["Ingen norsk myndighetsmodell bygger på en mekanisk reserve-multiplikator; pengemengden er en endogen/residual størrelse i KVARTS og NEMO."]},
+
+  {g:"A. Pengeskaping og endogene penger", v:"warn",
+   q:"Penger «skapt av ingenting» — pengene eksisterte ikke sekundet før.",
+   truth:"Teknisk riktig om kontopengene: et nytt innskudd føres inn ved signering.",
+   prob:"«Av ingenting» skjuler at motposten er en fordring (balanseutvidelse på begge sider), og at utlån er begrenset av kapital, regulering, lønnsomhet og kredittverdig etterspørsel. Ikke gratis penger.", probWarn:true,
+   models:["NEMO modellerer nettopp disse skrankene: kredittpåslag, pant/LTV og bankenes profittmaksimering begrenser kredittveksten."]},
+
+  // ---- B. Bankmargin ----
+  {g:"B. Bankenes margin", v:"ok",
+   q:"Et lån på 1 mill. til 5 % over 25 år gir ~740 000 kr i renteinntekter.",
+   truth:"Regnestykket stemmer: annuitetslån gir ~754 000 kr i nominelle renter. «Om lag 740 000» er innenfor.",
+   prob:"Ingen tallinnvending.", probWarn:false,
+   models:["Ren regneoperasjon; ingen modell nødvendig."]},
+
+  {g:"B. Bankenes margin", v:"warn",
+   q:"Renteinntekten er «ren gevinst fra penger som ble skapt i det øyeblikket avtalen ble signert».",
+   truth:"Artikkelen korrigerer seg selv: den nevner finansieringskostnad og kredittrisiko like etter.",
+   prob:"«Ren gevinst» er likevel misvisende: mesteparten av renten dekker bankens finansieringskostnad. Profitten er <b>marginen</b> (typisk 1,5–2 pp netto rentemargin), ikke hele renten.", probWarn:true,
+   models:["NEMO representerer dette som et kredittpåslag (en friksjon), ikke som gratis fortjeneste. Finansiell stabilitet: NAM-FS."]},
+
+  {g:"B. Bankenes margin", v:"ok",
+   q:"Rentemarginen er systemisk positiv og bankenes kjernefortjeneste; DNB tjener milliarder.",
+   truth:"Riktig. Netto rentemargin er kjerneinntekten, og store banker leverer solide overskudd.",
+   prob:"Innrammingen «arkitekturen som virker som tiltenkt» er retorisk, men den underliggende påstanden er korrekt.", probWarn:false,
+   models:["Bankenes lønnsomhet og soliditet overvåkes i finansiell stabilitet-rammeverket, ikke i konjunkturkjernemodellene."]},
+
+  {g:"B. Bankenes margin", v:"ok",
+   q:"Innskudd er bankenes billigste og mest stabile finansieringskilde — selv om de ikke «finansierer» utlån i mellomleddsforstand.",
+   truth:"En presis og korrekt nyanse, som balanserer den sterke «av ingenting»-påstanden. Innskuddsrenten ligger under markedsrenten.",
+   prob:"Ingen reell innvending — dette er artikkelen på sitt mest nyanserte.", probWarn:false,
+   models:["Konsistent med hvordan bankfinansiering behandles i finansiell stabilitet-analysene."]},
+
+  // ---- C. Østerriksk skole ----
+  {g:"C. Østerriksk konjunkturteori", v:"warn",
+   q:"Rente under «fritt markeds»-nivå sender falske signaler og utløser feilinvesteringer (Hayek/Mises).",
+   truth:"Korrekt referat av østerriksk konjunkturteori (ABCT); Hayek og Mises argumenterte slik.",
+   prob:"ABCT er <b>heterodoks og empirisk svakt støttet</b>, men presenteres som etablert sannhet. Den «naturlige renten» er uobserverbar, så påstanden er vanskelig å falsifisere. <b>OECD/Norges Bank (2026)</b> bruker i stedet et empirisk estimert nøytralt realrentenivå <b>r* = 0,25–1,5 %</b> (ny-keynesiansk) — målbart, ikke østerriksk.", probWarn:true,
+   models:["Ingen norsk myndighetsmodell bygger på ABCT. NEMO har en ny-keynesiansk nøytral realrente (r*) og produksjonsgap — en annen og testbar teori om «for lav rente»."]},
+
+  // ---- D. Bolig og gjeld ----
+  {g:"D. Bolig og gjeld", v:"warn",
+   q:"Boligprisvekst er i stor grad et kredittfenomen i en selvforsterkende syklus (Minsky).",
+   truth:"Det finnes solid empirisk støtte for kobling mellom kreditt og boligpriser (Jordà–Schularick–Taylor).",
+   prob:"Ensidig: tilbudssiden (regulering, byggetakt, befolkning, inntektsvekst) er minst like viktig i Norge. Kreditt forsterker, men forklarer ikke alene. <b>OECD 2026 er eksplisitt:</b> den lave tilbudsresponsen peker på strukturelle byggebegrensninger (jordvern, grøntbelter, regulering) — og anbefaler <b>arealreform</b>, ikke kredittinngrep.", probWarn:true,
+   models:["NEMO har bolig, pant og LTV; KVARTS har boliginvestering og en konsumrelasjon med formue (w) i feiljusteringslikningen."]},
+
+  {g:"D. Bolig og gjeld", v:"ok",
+   q:"Husholdningsgjeld vokste fra 115 % (1994) til ~230 % av disponibel inntekt (2024); ~100 % av BNP (IMF).",
+   truth:"Korrekt størrelsesorden. Norge er blant landene med høyest husholdningsgjeld.",
+   prob:"Norges Banks «gjeldsbelastning» ligger nærmere 245 % (litt annen definisjon), men avviket er lite.", probWarn:false,
+   models:["Gjeldsbelastning er en sentral indikator i Norges Banks finansiell stabilitet-rapportering."]},
+
+  {g:"D. Bolig og gjeld", v:"ok",
+   q:"Nye boliglånstakere i 2024 hadde gjennomsnittlig gjeldsgrad på 323 % av disponibel inntekt; USA ~110 %, UK ~150 %.",
+   truth:"Konsistent med Finanstilsynets boliglånsundersøkelse; det regulatoriske taket er 500 %. De internasjonale tallene er rimelige.",
+   prob:"Ingen vesentlig innvending.", probWarn:false,
+   models:["Utlånsforskriften (gjeldsgrad-tak 5× inntekt, belåningsgrad maks 90 %, stresstest +3 pp) er makrotilsynsverktøyet artikkelen ikke nevner. Pikant: egenkapitalkravet ble <b>lempet fra 15 % til 10 % i januar 2025</b> — myndighetene gikk altså motsatt vei av artikkelens gjeldsdempende ambisjon."]},
+
+  // ---- E. Pengepolitikk ----
+  {g:"E. Pengepolitikk", v:"ok",
+   q:"Renten ble hevet fra null til over 4 %; inflasjonen falt fra ~7 % (2022) mot ~3 % (2024). Virker, men med etterslep.",
+   truth:"Verifisert: 0 % (2021) → 4,5 % topp; KPI-topp 7,5 % (okt. 2022) ned mot 3 %. Etterslep er korrekt beskrevet.",
+   prob:"Tidsbildet har eldet seg: prisveksten festet seg, og Norges Bank <b>hevet renten igjen til 4,25 % i mai 2026</b>. Rentebanen (PPR 2/26) peker mot ~4,5 % før fall mot 3,2 % i 2029. «Renten ser ut til å virke» var altså for tidlig sagt.", probWarn:true,
+   models:["Akkurat denne transmisjonen — rente → etterspørsel/valuta → inflasjon — er NEMOs kjernemekanisme (Figur 5 i kildedokumentet); rentebanen er NEMOs optimerte bane betinget på skjønn."]},
+
+  {g:"E. Pengepolitikk", v:"ok",
+   q:"Inflasjonen har lite rentesensitive komponenter (import, energi, lønn); en sentralbank kan ikke heve bort global prisvekst.",
+   truth:"Korrekt og viktig poeng. Importert og energidrevet prisvekst er lite rentefølsom på kort sikt.",
+   prob:"Liten nyanse: valutakurskanalen kobler faktisk renten til importpriser — en renteøkning styrker kronen og demper importert inflasjon.", probWarn:false,
+   models:["NEMO har eksplisitt en valutakurskanal: i ↑ → kronen styrkes → importpriser ↓. Så koblingen er svakere, ikke fraværende."]},
+
+  {g:"E. Pengepolitikk", v:"warn",
+   q:"Mandatet er et diskresjonært inflasjonsmål, ikke en bindende regel; Friedman: regler gjør minst skade.",
+   truth:"Friedman-representasjonen er korrekt (Nobel 1976; talsmann for forutsigbare regler).",
+   prob:"Falsk dikotomi: fleksibel inflasjonsstyring <b>er</b> en regelforankret praksis med skjønn. Ren regelbinding (pengevekstregel) ble forlatt fordi den feilet empirisk. <b>OECD 2026</b> vurderer den norske erfaringen med fleksibel inflasjonsstyring som «broadly positive» og anbefaler å <b>bekrefte og styrke</b> rammeverket, ikke avvikle det.", probWarn:true,
+   models:["NEMOs tapsfunksjon L=(π−π*)²+λŷ²+ν(Δi)² er nettopp en regel + skjønn. «Regel vs. skjønn» beskriver ikke apparatet korrekt."]},
+
+  // ---- F. Oljefond / handlingsregel ----
+  {g:"F. Oljefondet og handlingsregelen", v:"warn",
+   q:"Oljepengebruk tilfører kroner uten en motsvarende gjeldspost — ulikt bankkreditt.",
+   truth:"En kjerne av sannhet: oljepengebruk er en netto finansiell tilførsel til privat sektor uten privat gjeld.",
+   prob:"Forenkler: det trekker på en statlig formue (SPU), mye steriliseres av skatt og import, og beskrivelsen av valutaveksling glatter over hvordan tilførselen faktisk håndteres.", probWarn:true,
+   models:["NORA og DEMEC modellerer SPU + handlingsregelens budsjettbeskrankning eksplisitt; MODAG regner makrovirkningen av finanspolitikken."]},
+
+  {g:"F. Oljefondet og handlingsregelen", v:"bad",
+   q:"Oljepengebruken (~500–542 mrd) sammenlignes med M3 (~3 500 mrd) for å antyde inflasjonsdriv.",
+   truth:"Tallene for oljepengebruk er plausible (statsbudsjettet).",
+   prob:"<b>Strøm-mot-beholdning-feil:</b> en årlig flyt kan ikke måles som andel av en pengebeholdning. M3 var dessuten 3 193 mrd ved utgangen av 2024 (ikke 3 500), og 3 576 mrd i apr. 2026. Oljepengebruk er finanspolitikk, ikke pengeskaping.", probWarn:false,
+   models:["I MODAG/NORA/DEMEC inngår oljepengebruk som finanspolitisk impuls med multiplikator — ikke som en økning i pengemengden. Feilen ville ikke overlevd i disse modellene."]},
+
+  {g:"F. Oljefondet og handlingsregelen", v:"warn",
+   q:"Tilførselen er en «vedvarende og strukturell tilførsel av kjøpekraft» som får for lite oppmerksomhet i prisdebatten.",
+   truth:"Det er riktig at finanspolitisk impuls påvirker etterspørsel og pris, og at dette ofte underkommuniseres.",
+   prob:"Handlingsregelen (3 % realavkastning) er nettopp designet for å fase inn bruken i et bærekraftig, ikke-destabiliserende tempo. Innrammingen som skjult driv overdriver.", probWarn:true,
+   models:["DEMEC vurderer langsiktig bærekraft av nettopp denne innfasingen; Thøgersen-utvalget (NOU 2015:9) er den faglige bakgrunnen."]},
+
+  // ---- G. Reformforslag ----
+  {g:"G. Reformforslagene", v:"ok",
+   q:"Finanstilsynet bør publisere kvartalsvise marginrapporter per bank (åpenhet skaper konkurransepress).",
+   truth:"Rimelig og mainstream-vennlig: bedre informasjon styrker markedsdisiplin. Et reelt informasjonsgap.",
+   prob:"Ingen vesentlig innvending; et moderat, gjennomførbart tiltak.", probWarn:false,
+   models:["Utenfor modellapparatet — et tilsyns-/transparensspørsmål."]},
+
+  {g:"G. Reformforslagene", v:"ok",
+   q:"Fas ut rentefradraget 5 pp/år i 8 år og senk inntektsskatten tilsvarende — «staten betaler ikke mer, du ikke mer».",
+   truth:"Solid økonomifaglig forslag: rentefradraget (22 %) subsidierer gjeld og presser boligpriser. Friedman-logikken er korrekt anvendt.",
+   prob:"«Ingen får høyere skatt» er en forenkling: nettovirkningen varierer per husholdning etter gjeldsgrad — nettopp det LOTTE beregner. <b>OECD 2026 støtter og utvider poenget:</b> den gunstige boligbeskatningen kapitaliseres i prisene, og «the very light taxation of housing needs reform» — ikke bare rentefradraget.", probWarn:true,
+   models:["LOTTE-Skatt er bygget for å score akkurat dette: proveny + fordelingsprofil per inntektsdesil (Figur 9 i kildedokumentet)."]},
+
+  {g:"G. Reformforslagene", v:"bad",
+   q:"Trapp bankenes egenkapitalkrav opp «mot 8–10 % av risikovektede eiendeler» for å bremse kredittmultiplikatoren.",
+   truth:"Retningen (høyere kapital demper kredittrisiko) er forsvarlig.",
+   prob:"<b>Faktafeil:</b> norske banker har allerede CET1-krav på ~15–18 % inkl. buffere. «Mot 8–10 %» er <i>lavere</i> enn dagens nivå. «Kredittmultiplikator per krone egenkapital» gjeninnfører multiplikatorbildet artikkelen forkastet.", probWarn:false,
+   models:["Kapitalkrav og motsyklisk buffer hører til makrotilsyn/finansiell stabilitet, ikke til konjunkturkjernemodellene."]},
+
+  {g:"G. Reformforslagene", v:"bad",
+   q:"Forankre pengepolitikken i en eksplisitt M2-vekstregel på 2–3 %.",
+   truth:"Friedman-inspirasjonen er historisk reell.",
+   prob:"<b>Motsier egen premiss:</b> hvis penger er endogene (artikkelens åpning), kan ikke sentralbanken styre M2 direkte. Monetær målstyring ble prøvd og forlatt på 1980-tallet pga. ustabil omløpshastighet. En selvmotsigelse i kjernen av reformpakken. <b>OECD 2026</b> anbefaler eksplisitt å holde rammeverket «broadly unchanged» med inflasjonsmålet som primært mål — det motsatte av en M2-regel.", probWarn:false,
+   models:["Hele apparatet er rentebasert. NEMO styrer på renten med inflasjonsmål; ingen modell styrer på pengemengde. Forslaget bryter med apparatets logikk."]},
+
+  // ---- H. Chicagoplanen ----
+  {g:"H. Dobbeltrolle og Chicagoplanen", v:"ok",
+   q:"Skill betaling fra kreditt: 100 % reserve på brukskonti, separate utlånsinstitutter (Simons/Fisher 1933, Friedman sympatisk).",
+   truth:"Korrekt idé- og personhistorikk. Chicagoplanen og «narrow banking»/suverene penger er reelle forslag; Friedman gikk inn for 100 % reserver.",
+   prob:"Radikalt og heterodokst, men artikkelen presenterer det balansert som et forslag, ikke en fasit.", probWarn:false,
+   models:["Ligger utenfor det norske apparatet; ingen myndighetsmodell forutsetter en slik arkitektur."]},
+
+  {g:"H. Dobbeltrolle og Chicagoplanen", v:"warn",
+   q:"Benes &amp; Kumhof (IMF 2012) fant at 100 % reserve reduserer privat gjeld og øker stabilitet, uten deflasjon.",
+   truth:"Korrekt referat av IMF-arbeidspapiret «The Chicago Plan Revisited».",
+   prob:"Det er et <b>modellresultat</b> sterkt avhengig av forutsetninger i én DSGE, presentert litt for konklusivt. Et arbeidspapir er ikke IMFs offisielle syn.", probWarn:true,
+   models:["Et DSGE-resultat — samme metodefamilie som NEMO/NORA, med samme forbehold: resultatene følger av modellantakelsene."]},
+
+  {g:"H. Dobbeltrolle og Chicagoplanen", v:"ok",
+   q:"De fem største bankene (DNB, SpareBank 1, Nordea, Danske, Handelsbanken) dominerer både betaling og boliglån.",
+   truth:"I hovedsak korrekt om markedskonsentrasjonen.",
+   prob:"Liten upresisjon: SpareBank 1 er en allianse av selvstendige banker, ikke ett foretak.", probWarn:false,
+   models:["Konkurranse-/konsentrasjonsspørsmål; utenfor makromodellene."]},
+
+  {g:"H. Dobbeltrolle og Chicagoplanen", v:"warn",
+   q:"En separert utlåner må «hente inn reell sparing fra investorer» — renten stiger når kredittetterspørsel overstiger sparing, og bremser låneopptak.",
+   truth:"Logisk konsistent <i>innenfor</i> en modell med separate utlånsinstitutter.",
+   prob:"Gjeninnfører loanable-funds-/mellomleddsbildet (sparing finansierer lån) som artikkelen forkastet i åpningen. Nok en indre spenning mellom diagnose og medisin.", probWarn:true,
+   models:["Spenningen er den samme som i syntese-seksjonen: endogene penger (diagnose) vs. lånbare midler (medisin)."]},
+];
+
+const MATRIX = [
+  {t:"Pengeskaping / endogene penger", c:["s","s","p","","",""]},
+  {t:"Bankmargin / kredittpåslag",     c:["","","p","","",""]},
+  {t:"Østerriksk konjunkturteori",     c:["","","","","",""]},
+  {t:"Bolig, gjeld, kredittsyklus",     c:["p","s","p","","","s"]},
+  {t:"Pengepolitikk: rente → inflasjon",c:["s","s","p","s","",""]},
+  {t:"Regel vs. skjønn (mandat)",       c:["","","p","s","",""]},
+  {t:"Oljepengebruk / handlingsregel",  c:["","p","","p","p","s"]},
+  {t:"Fiskal multiplikator",            c:["s","p","s","p","",""]},
+  {t:"Rentefradrag-reform",             c:["","s","","","","p"]},
+  {t:"Egenkapital / kredittvekst",      c:["","","s","","",""]},
+  {t:"M2-vekstregel",                   c:["","","","","",""]},
+  {t:"Bærekraft / aldring / SPU",       c:["","","","s","p","p"]},
+];
+
+// render ledger
+const mount = document.getElementById('ledger-mount');
+let curGroup = null;
+CLAIMS.forEach((c,i)=>{
+  if(c.g!==curGroup){
+    curGroup=c.g;
+    const gh=document.createElement('div');
+    gh.className='group-head';
+    gh.innerHTML=`<h3>${c.g}</h3>`;
+    mount.appendChild(gh);
+  }
+  const el=document.createElement('div');
+  el.className='claim '+c.v;
+  el.dataset.v=c.v;
+  const vlabel={ok:'Riktig',warn:'Delvis',bad:'Feil'}[c.v];
+  el.innerHTML=`
+    <div class="claim-head">
+      <span class="caret">▶</span>
+      <span class="claim-q">${c.q}</span>
+      <span class="chip ${c.v}">${vlabel}</span>
+    </div>
+    <div class="claim-body">
+      <div class="ts">
+        <div class="box truth"><h5>✓ Det stemmer</h5>${c.truth}</div>
+        <div class="box prob ${c.probWarn?'warnp':''}"><h5>${c.probWarn?'△ Det skurrer':'✕ Det skurrer'}</h5>${c.prob}</div>
+      </div>
+      <div class="modelrow"><h5>◣ Modellkobling</h5>${c.models.join(' ')}</div>
+    </div>`;
+  el.querySelector('.claim-head').addEventListener('click',()=>el.classList.toggle('open'));
+  mount.appendChild(el);
+});
+
+// filter
+const fcount=document.getElementById('fcount');
+function applyFilter(f){
+  let shown=0, total=CLAIMS.length;
+  document.querySelectorAll('.claim').forEach(el=>{
+    const ok = (f==='all'||el.dataset.v===f);
+    el.style.display = ok?'':'none';
+    if(ok) shown++;
+  });
+  // hide empty group heads
+  document.querySelectorAll('.group-head').forEach(gh=>{
+    let n=gh.nextElementSibling, any=false;
+    while(n && n.classList.contains('claim')){ if(n.style.display!=='none') any=true; n=n.nextElementSibling; }
+    gh.style.display = any?'':'none';
+  });
+  fcount.textContent = `viser ${shown} av ${total}`;
+}
+document.querySelectorAll('.fbtn').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('.fbtn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    applyFilter(b.dataset.f);
+  });
+});
+applyFilter('all');
+
+// render matrix
+const mxm=document.getElementById('matrix-mount');
+MATRIX.forEach(r=>{
+  const tr=document.createElement('tr');
+  let cells=`<td class="rowh"><b>${r.t}</b></td>`;
+  r.c.forEach(v=>{
+    let dot = v==='p'?'<span class="dot p"></span>': v==='s'?'<span class="dot s"></span>':'<span style="color:#c9d0db">·</span>';
+    cells+=`<td>${dot}</td>`;
+  });
+  tr.innerHTML=cells;
+  mxm.appendChild(tr);
+});
+</script>
+</body>
+</html>
